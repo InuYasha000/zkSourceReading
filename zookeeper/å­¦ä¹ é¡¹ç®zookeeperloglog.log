@@ -1,0 +1,197 @@
+2020-04-11 11:46:12  [ main:0 ] - [ INFO ]  Log4j found with jmx enabled.
+2020-04-11 11:46:12  [ main:6 ] - [ DEBUG ]  registerLog4jMBeans()
+2020-04-11 11:46:12  [ main:106 ] - [ DEBUG ]  preRegister called. Server=com.sun.jmx.mbeanserver.JmxMBeanServer@72b6cbcc, name=log4j:hierarchy=default
+2020-04-11 11:46:12  [ main:108 ] - [ DEBUG ]  postRegister is called.
+2020-04-11 11:46:12  [ main:119 ] - [ DEBUG ]  preRegister called. Server=com.sun.jmx.mbeanserver.JmxMBeanServer@72b6cbcc, name=log4j:logger=root
+2020-04-11 11:46:12  [ main:119 ] - [ DEBUG ]  Adding AppenderMBean for appender named stdout
+2020-04-11 11:46:12  [ main:124 ] - [ DEBUG ]  getMBeanInfo called.
+2020-04-11 11:46:12  [ main:125 ] - [ DEBUG ]  preRegister called. Server=com.sun.jmx.mbeanserver.JmxMBeanServer@72b6cbcc, name=log4j:appender=stdout
+2020-04-11 11:46:12  [ main:125 ] - [ DEBUG ]  Adding LayoutMBean:stdout,layout=org.apache.log4j.PatternLayout
+2020-04-11 11:46:12  [ main:125 ] - [ DEBUG ]  getMBeanInfo called.
+2020-04-11 11:46:12  [ main:125 ] - [ DEBUG ]  preRegister called. Server=com.sun.jmx.mbeanserver.JmxMBeanServer@72b6cbcc, name=log4j:appender=stdout,layout=org.apache.log4j.PatternLayout
+2020-04-11 11:46:12  [ main:126 ] - [ DEBUG ]  Adding AppenderMBean for appender named D
+2020-04-11 11:46:12  [ main:126 ] - [ DEBUG ]  getMBeanInfo called.
+2020-04-11 11:46:12  [ main:126 ] - [ DEBUG ]  preRegister called. Server=com.sun.jmx.mbeanserver.JmxMBeanServer@72b6cbcc, name=log4j:appender=D
+2020-04-11 11:46:12  [ main:126 ] - [ DEBUG ]  Adding LayoutMBean:D,layout=org.apache.log4j.PatternLayout
+2020-04-11 11:46:12  [ main:126 ] - [ DEBUG ]  getMBeanInfo called.
+2020-04-11 11:46:12  [ main:127 ] - [ DEBUG ]  preRegister called. Server=com.sun.jmx.mbeanserver.JmxMBeanServer@72b6cbcc, name=log4j:appender=D,layout=org.apache.log4j.PatternLayout
+2020-04-11 11:46:12  [ main:127 ] - [ DEBUG ]  Adding AppenderMBean for appender named E
+2020-04-11 11:46:12  [ main:128 ] - [ DEBUG ]  getMBeanInfo called.
+2020-04-11 11:46:12  [ main:128 ] - [ DEBUG ]  preRegister called. Server=com.sun.jmx.mbeanserver.JmxMBeanServer@72b6cbcc, name=log4j:appender=E
+2020-04-11 11:46:12  [ main:128 ] - [ DEBUG ]  Adding LayoutMBean:E,layout=org.apache.log4j.PatternLayout
+2020-04-11 11:46:12  [ main:128 ] - [ DEBUG ]  getMBeanInfo called.
+2020-04-11 11:46:12  [ main:128 ] - [ DEBUG ]  preRegister called. Server=com.sun.jmx.mbeanserver.JmxMBeanServer@72b6cbcc, name=log4j:appender=E,layout=org.apache.log4j.PatternLayout
+2020-04-11 11:46:12  [ main:129 ] - [ DEBUG ]  ---Adding logger [root] as listener.
+2020-04-11 11:46:12  [ main:130 ] - [ DEBUG ]  preRegister called. Server=com.sun.jmx.mbeanserver.JmxMBeanServer@72b6cbcc, name=log4j:logger=org.apache.log4j.jmx.LayoutDynamicMBean
+2020-04-11 11:46:12  [ main:131 ] - [ DEBUG ]  ---Adding logger [org.apache.log4j.jmx.LayoutDynamicMBean] as listener.
+2020-04-11 11:46:12  [ main:131 ] - [ DEBUG ]  preRegister called. Server=com.sun.jmx.mbeanserver.JmxMBeanServer@72b6cbcc, name=log4j:logger=org.apache.zookeeper.jmx.ManagedUtil
+2020-04-11 11:46:12  [ main:131 ] - [ DEBUG ]  ---Adding logger [org.apache.zookeeper.jmx.ManagedUtil] as listener.
+2020-04-11 11:46:12  [ main:131 ] - [ DEBUG ]  preRegister called. Server=com.sun.jmx.mbeanserver.JmxMBeanServer@72b6cbcc, name=log4j:logger=org.apache.log4j.jmx.LoggerDynamicMBean
+2020-04-11 11:46:12  [ main:131 ] - [ DEBUG ]  ---Adding logger [org.apache.log4j.jmx.LoggerDynamicMBean] as listener.
+2020-04-11 11:46:12  [ main:132 ] - [ DEBUG ]  preRegister called. Server=com.sun.jmx.mbeanserver.JmxMBeanServer@72b6cbcc, name=log4j:logger=org.apache.zookeeper.server.ZooKeeperServerMain
+2020-04-11 11:46:12  [ main:132 ] - [ DEBUG ]  ---Adding logger [org.apache.zookeeper.server.ZooKeeperServerMain] as listener.
+2020-04-11 11:46:12  [ main:132 ] - [ DEBUG ]  preRegister called. Server=com.sun.jmx.mbeanserver.JmxMBeanServer@72b6cbcc, name=log4j:logger=org.apache.zookeeper.jmx.MBeanRegistry
+2020-04-11 11:46:12  [ main:132 ] - [ DEBUG ]  ---Adding logger [org.apache.zookeeper.jmx.MBeanRegistry] as listener.
+2020-04-11 11:46:12  [ main:132 ] - [ DEBUG ]  preRegister called. Server=com.sun.jmx.mbeanserver.JmxMBeanServer@72b6cbcc, name=log4j:logger=org.apache.log4j.jmx.HierarchyDynamicMBean
+2020-04-11 11:46:12  [ main:132 ] - [ DEBUG ]  ---Adding logger [org.apache.log4j.jmx.HierarchyDynamicMBean] as listener.
+2020-04-11 11:46:12  [ main:132 ] - [ DEBUG ]  preRegister called. Server=com.sun.jmx.mbeanserver.JmxMBeanServer@72b6cbcc, name=log4j:logger=org.apache.log4j.jmx.AppenderDynamicMBean
+2020-04-11 11:46:12  [ main:133 ] - [ DEBUG ]  ---Adding logger [org.apache.log4j.jmx.AppenderDynamicMBean] as listener.
+2020-04-11 11:46:12  [ main:135 ] - [ INFO ]  Reading configuration from: E:\学习项目\zookeeper\config\zoo.cfg
+2020-04-11 11:46:12  [ main:137 ] - [ WARN ]  \tmp\zookeeper is relative. Prepend .\ to indicate that you're sure!
+2020-04-11 11:46:12  [ main:142 ] - [ INFO ]  clientPortAddress is 0.0.0.0:2181
+2020-04-11 11:46:12  [ main:142 ] - [ INFO ]  secureClientPort is not set
+2020-04-11 11:46:12  [ main:143 ] - [ INFO ]  Starting server
+2020-04-11 11:46:12  [ main:146 ] - [ DEBUG ]  Opening datadir:\tmp\zookeeper snapDir:\tmp\zookeeper
+2020-04-11 11:46:12  [ main:146 ] - [ INFO ]  zookeeper.snapshot.trust.empty : false
+2020-04-11 11:46:12  [ main:177 ] - [ INFO ]  Server environment:zookeeper.version=3.5.7-f0fdd52973d373ffd9c86b81d99842dc2c7f660e, built on 02/10/2020 11:39 GMT
+2020-04-11 11:46:12  [ main:178 ] - [ INFO ]  Server environment:host.name=DESKTOP-1MM12IS
+2020-04-11 11:46:12  [ main:178 ] - [ INFO ]  Server environment:java.version=1.8.0_131
+2020-04-11 11:46:12  [ main:178 ] - [ INFO ]  Server environment:java.vendor=Oracle Corporation
+2020-04-11 11:46:12  [ main:178 ] - [ INFO ]  Server environment:java.home=C:\Program Files\Java\jdk1.8.0_131\jre
+2020-04-11 11:46:12  [ main:178 ] - [ INFO ]  Server environment:java.class.path=C:\Program Files\Java\jdk1.8.0_131\jre\lib\charsets.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\deploy.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\ext\access-bridge-64.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\ext\cldrdata.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\ext\dnsns.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\ext\jaccess.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\ext\jfxrt.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\ext\localedata.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\ext\nashorn.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\ext\sunec.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\ext\sunjce_provider.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\ext\sunmscapi.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\ext\sunpkcs11.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\ext\zipfs.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\javaws.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\jce.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\jfr.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\jfxswt.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\jsse.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\management-agent.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\plugin.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\resources.jar;C:\Program Files\Java\jdk1.8.0_131\jre\lib\rt.jar;E:\学习项目\zookeeper\zookeeper\target\classes;D:\maven\mavenrepository\org\apache\zookeeper\zookeeper-jute\3.5.7\zookeeper-jute-3.5.7.jar;D:\maven\mavenrepository\org\apache\yetus\audience-annotations\0.5.0\audience-annotations-0.5.0.jar;D:\maven\mavenrepository\io\netty\netty-handler\4.1.45.Final\netty-handler-4.1.45.Final.jar;D:\maven\mavenrepository\io\netty\netty-common\4.1.45.Final\netty-common-4.1.45.Final.jar;D:\maven\mavenrepository\io\netty\netty-buffer\4.1.45.Final\netty-buffer-4.1.45.Final.jar;D:\maven\mavenrepository\io\netty\netty-transport\4.1.45.Final\netty-transport-4.1.45.Final.jar;D:\maven\mavenrepository\io\netty\netty-resolver\4.1.45.Final\netty-resolver-4.1.45.Final.jar;D:\maven\mavenrepository\io\netty\netty-codec\4.1.45.Final\netty-codec-4.1.45.Final.jar;D:\maven\mavenrepository\io\netty\netty-transport-native-epoll\4.1.45.Final\netty-transport-native-epoll-4.1.45.Final.jar;D:\maven\mavenrepository\io\netty\netty-transport-native-unix-common\4.1.45.Final\netty-transport-native-unix-common-4.1.45.Final.jar;D:\maven\mavenrepository\org\slf4j\slf4j-api\1.7.25\slf4j-api-1.7.25.jar;D:\maven\mavenrepository\org\slf4j\slf4j-log4j12\1.7.25\slf4j-log4j12-1.7.25.jar;D:\maven\mavenrepository\log4j\log4j\1.2.17\log4j-1.2.17.jar;C:\Program Files\JetBrains\IntelliJ IDEA 2017.3.4\lib\idea_rt.jar;C:\Users\cheng\.IntelliJIdea2017.3\system\captureAgent\debugger-agent.jar
+2020-04-11 11:46:12  [ main:178 ] - [ INFO ]  Server environment:java.library.path=C:\Program Files\Java\jdk1.8.0_131\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\Program Files\IDM Computer Solutions\UltraEdit;C:\Program Files\Java\jdk1.8.0_131\bin;D:\software\node.js;D:\software\node.js\node_global;D:\software\node.js\node_modules;D:\maven\apache-maven-3.5.3\bin;C:\Program Files\apache-ant-1.10.7-bin\apache-ant-1.10.7\bin;D:\software\Python;D:\software\Python\Library\mingw-w64\bin;D:\software\Python\Library\usr\bin;D:\software\Python\Library\bin;D:\software\Python\Scripts;C:\Users\cheng\AppData\Local\Microsoft\WindowsApps;D:\软件\Microsoft VS Code\bin;D:\software\Fiddler;C:\Users\cheng\AppData\Roaming\npm;C:\Users\cheng\AppData\Local\Microsoft\WindowsApps;C:\Program Files\Java\jdk1.8.0_131\bin;D:\software\node.js;;.
+2020-04-11 11:46:12  [ main:179 ] - [ INFO ]  Server environment:java.io.tmpdir=C:\Users\cheng\AppData\Local\Temp\
+2020-04-11 11:46:12  [ main:179 ] - [ INFO ]  Server environment:java.compiler=<NA>
+2020-04-11 11:46:12  [ main:179 ] - [ INFO ]  Server environment:os.name=Windows 10
+2020-04-11 11:46:12  [ main:179 ] - [ INFO ]  Server environment:os.arch=amd64
+2020-04-11 11:46:12  [ main:179 ] - [ INFO ]  Server environment:os.version=10.0
+2020-04-11 11:46:12  [ main:179 ] - [ INFO ]  Server environment:user.name=cheng
+2020-04-11 11:46:12  [ main:179 ] - [ INFO ]  Server environment:user.home=C:\Users\cheng
+2020-04-11 11:46:12  [ main:179 ] - [ INFO ]  Server environment:user.dir=E:\学习项目\zookeeper\zookeeper
+2020-04-11 11:46:12  [ main:179 ] - [ INFO ]  Server environment:os.memory.free=231MB
+2020-04-11 11:46:12  [ main:179 ] - [ INFO ]  Server environment:os.memory.max=3618MB
+2020-04-11 11:46:12  [ main:179 ] - [ INFO ]  Server environment:os.memory.total=245MB
+2020-04-11 11:46:12  [ main:181 ] - [ INFO ]  minSessionTimeout set to 4000
+2020-04-11 11:46:12  [ main:181 ] - [ INFO ]  maxSessionTimeout set to 40000
+2020-04-11 11:46:12  [ main:182 ] - [ INFO ]  Created server with tickTime 2000 minSessionTimeout 4000 maxSessionTimeout 40000 datadir \tmp\zookeeper\version-2 snapdir \tmp\zookeeper\version-2
+2020-04-11 11:46:13  [ main:192 ] - [ WARN ]  Unable to load jetty, not starting JettyAdminServer
+java.lang.NoClassDefFoundError: org/eclipse/jetty/server/Connector
+	at java.lang.Class.forName0(Native Method)
+	at java.lang.Class.forName(Class.java:264)
+	at org.apache.zookeeper.server.admin.AdminServerFactory.createAdminServer(AdminServerFactory.java:43)
+	at org.apache.zookeeper.server.ZooKeeperServerMain.runFromConfig(ZooKeeperServerMain.java:143)
+	at org.apache.zookeeper.server.ZooKeeperServerMain.initializeAndRun(ZooKeeperServerMain.java:113)
+	at org.apache.zookeeper.server.ZooKeeperServerMain.main(ZooKeeperServerMain.java:71)
+Caused by: java.lang.ClassNotFoundException: org.eclipse.jetty.server.Connector
+	at java.net.URLClassLoader.findClass(URLClassLoader.java:381)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:424)
+	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:335)
+	at java.lang.ClassLoader.loadClass(ClassLoader.java:357)
+	... 6 more
+2020-04-11 11:46:13  [ main:1049 ] - [ INFO ]  Using org.apache.zookeeper.server.NIOServerCnxnFactory as server connection factory
+2020-04-11 11:46:13  [ main:1079 ] - [ INFO ]  Configuring NIO connection handler with 10s sessionless connection timeout, 2 selector thread(s), 24 worker threads, and 64 kB direct buffers.
+2020-04-11 11:46:13  [ main:1083 ] - [ INFO ]  binding to port 0.0.0.0/0.0.0.0:2181
+2020-04-11 11:46:13  [ main:1116 ] - [ INFO ]  zookeeper.snapshotSizeFactor = 0.33
+2020-04-11 11:46:13  [ main:1118 ] - [ INFO ]  Reading snapshot \tmp\zookeeper\version-2\snapshot.1c
+2020-04-11 11:46:13  [ main:1124 ] - [ DEBUG ]  Created new input stream \tmp\zookeeper\version-2\log.1
+2020-04-11 11:46:13  [ main:1154 ] - [ DEBUG ]  Created new input archive \tmp\zookeeper\version-2\log.1
+2020-04-11 11:46:13  [ main:1155 ] - [ DEBUG ]  EOF exception java.io.EOFException: Failed to read \tmp\zookeeper\version-2\log.1
+2020-04-11 11:46:13  [ main:1159 ] - [ INFO ]  Snapshotting: 0x1c to \tmp\zookeeper\version-2\snapshot.1c
+2020-04-11 11:46:13  [ main:1176 ] - [ INFO ]  Using checkIntervalMs=60000 maxPerMinute=10000
+2020-04-11 11:46:37  [ NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:24466 ] - [ DEBUG ]  Accepted socket connection from /127.0.0.1:65421
+2020-04-11 11:46:53  [ ConnnectionExpirer:40919 ] - [ DEBUG ]  Closed socket connection for client /127.0.0.1:65421 (no session established for client)
+2020-04-11 11:47:03  [ NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:50860 ] - [ DEBUG ]  Accepted socket connection from /127.0.0.1:65430
+2020-04-11 11:47:05  [ NIOWorkerThread-1:52660 ] - [ DEBUG ]  Session establishment request from client /127.0.0.1:65430 client's lastZxid is 0x0
+2020-04-11 11:47:05  [ NIOWorkerThread-1:52662 ] - [ DEBUG ]  Adding session 0x1000042af440000
+2020-04-11 11:47:05  [ NIOWorkerThread-1:52662 ] - [ DEBUG ]  Client attempting to establish new session: session = 0x1000042af440000, zxid = 0x0, timeout = 1000, address = /127.0.0.1:65430
+2020-04-11 11:47:05  [ SyncThread:0:52663 ] - [ INFO ]  Creating new log file: log.1d
+2020-04-11 11:47:05  [ SyncThread:0:52698 ] - [ DEBUG ]  Processing request:: sessionid:0x1000042af440000 type:createSession cxid:0x0 zxid:0x1d txntype:-10 reqpath:n/a
+2020-04-11 11:47:05  [ SyncThread:0:52705 ] - [ DEBUG ]  sessionid:0x1000042af440000 type:createSession cxid:0x0 zxid:0x1d txntype:-10 reqpath:n/a
+2020-04-11 11:47:05  [ SyncThread:0:52723 ] - [ DEBUG ]  Established session 0x1000042af440000 with negotiated timeout 4000 for client /127.0.0.1:65430
+2020-04-11 11:47:05  [ NIOWorkerThread-3:53088 ] - [ WARN ]  Exception causing close of session 0x1000042af440000: 远程主机强迫关闭了一个现有的连接。
+2020-04-11 11:47:05  [ NIOWorkerThread-3:53089 ] - [ DEBUG ]  IOException stack trace
+java.io.IOException: 远程主机强迫关闭了一个现有的连接。
+	at sun.nio.ch.SocketDispatcher.read0(Native Method)
+	at sun.nio.ch.SocketDispatcher.read(SocketDispatcher.java:43)
+	at sun.nio.ch.IOUtil.readIntoNativeBuffer(IOUtil.java:223)
+	at sun.nio.ch.IOUtil.read(IOUtil.java:197)
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:380)
+	at org.apache.zookeeper.server.NIOServerCnxn.doIO(NIOServerCnxn.java:321)
+	at org.apache.zookeeper.server.NIOServerCnxnFactory$IOWorkRequest.doWork(NIOServerCnxnFactory.java:530)
+	at org.apache.zookeeper.server.WorkerService$ScheduledWorkRequest.run(WorkerService.java:155)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:748)
+2020-04-11 11:47:05  [ NIOWorkerThread-3:53089 ] - [ DEBUG ]  Unregister MBean [org.apache.ZooKeeperService:name0=StandaloneServer_port2181,name1=Connections,name2=127.0.0.1,name3=0x1000042af440000]
+2020-04-11 11:47:05  [ NIOWorkerThread-3:53089 ] - [ DEBUG ]  Closed socket connection for client /127.0.0.1:65430 which had sessionid 0x1000042af440000
+2020-04-11 11:47:07  [ NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:54982 ] - [ DEBUG ]  Accepted socket connection from /127.0.0.1:65431
+2020-04-11 11:47:09  [ NIOWorkerThread-4:56312 ] - [ DEBUG ]  Session establishment request from client /127.0.0.1:65431 client's lastZxid is 0x0
+2020-04-11 11:47:09  [ NIOWorkerThread-4:56313 ] - [ DEBUG ]  Adding session 0x1000042af440001
+2020-04-11 11:47:09  [ NIOWorkerThread-4:56313 ] - [ DEBUG ]  Client attempting to establish new session: session = 0x1000042af440001, zxid = 0x0, timeout = 1000, address = /127.0.0.1:65431
+2020-04-11 11:47:09  [ SyncThread:0:56365 ] - [ DEBUG ]  Processing request:: sessionid:0x1000042af440001 type:createSession cxid:0x0 zxid:0x1e txntype:-10 reqpath:n/a
+2020-04-11 11:47:09  [ SyncThread:0:56366 ] - [ DEBUG ]  sessionid:0x1000042af440001 type:createSession cxid:0x0 zxid:0x1e txntype:-10 reqpath:n/a
+2020-04-11 11:47:09  [ SyncThread:0:56366 ] - [ DEBUG ]  Established session 0x1000042af440001 with negotiated timeout 4000 for client /127.0.0.1:65431
+2020-04-11 11:47:09  [ SessionTracker:56919 ] - [ INFO ]  Expiring session 0x1000042af440000, timeout of 4000ms exceeded
+2020-04-11 11:47:09  [ SyncThread:0:56957 ] - [ DEBUG ]  Processing request:: sessionid:0x1000042af440000 type:closeSession cxid:0x0 zxid:0x1f txntype:-11 reqpath:n/a
+2020-04-11 11:47:09  [ SyncThread:0:56957 ] - [ DEBUG ]  Removing session 0x1000042af440000
+2020-04-11 11:47:09  [ ProcessThread(sid:0 cport:2181)::57086 ] - [ DEBUG ]  Checking session 0x1000042af440001
+2020-04-11 11:47:09  [ ProcessThread(sid:0 cport:2181)::57087 ] - [ DEBUG ]  Processing ACL: 31,s{'world,'anyone}
+
+2020-04-11 11:47:09  [ ProcessThread(sid:0 cport:2181)::57088 ] - [ DEBUG ]  Permission requested: 4 
+2020-04-11 11:47:09  [ ProcessThread(sid:0 cport:2181)::57088 ] - [ DEBUG ]  ACLs for node: [31,s{'world,'anyone}
+]
+2020-04-11 11:47:09  [ ProcessThread(sid:0 cport:2181)::57088 ] - [ DEBUG ]  Client credentials: ['ip,'127.0.0.1
+]
+2020-04-11 11:47:09  [ SyncThread:0:57170 ] - [ DEBUG ]  Processing request:: sessionid:0x1000042af440001 type:create cxid:0x1 zxid:0x20 txntype:1 reqpath:n/a
+2020-04-11 11:47:09  [ SyncThread:0:57172 ] - [ DEBUG ]  sessionid:0x1000042af440001 type:create cxid:0x1 zxid:0x20 txntype:1 reqpath:n/a
+2020-04-11 11:47:11  [ NIOWorkerThread-8:59022 ] - [ WARN ]  Exception causing close of session 0x1000042af440001: 远程主机强迫关闭了一个现有的连接。
+2020-04-11 11:47:11  [ NIOWorkerThread-8:59022 ] - [ DEBUG ]  IOException stack trace
+java.io.IOException: 远程主机强迫关闭了一个现有的连接。
+	at sun.nio.ch.SocketDispatcher.read0(Native Method)
+	at sun.nio.ch.SocketDispatcher.read(SocketDispatcher.java:43)
+	at sun.nio.ch.IOUtil.readIntoNativeBuffer(IOUtil.java:223)
+	at sun.nio.ch.IOUtil.read(IOUtil.java:197)
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:380)
+	at org.apache.zookeeper.server.NIOServerCnxn.doIO(NIOServerCnxn.java:321)
+	at org.apache.zookeeper.server.NIOServerCnxnFactory$IOWorkRequest.doWork(NIOServerCnxnFactory.java:530)
+	at org.apache.zookeeper.server.WorkerService$ScheduledWorkRequest.run(WorkerService.java:155)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:748)
+2020-04-11 11:47:11  [ NIOWorkerThread-8:59023 ] - [ DEBUG ]  Unregister MBean [org.apache.ZooKeeperService:name0=StandaloneServer_port2181,name1=Connections,name2=127.0.0.1,name3=0x1000042af440001]
+2020-04-11 11:47:11  [ NIOWorkerThread-8:59023 ] - [ DEBUG ]  Closed socket connection for client /127.0.0.1:65431 which had sessionid 0x1000042af440001
+2020-04-11 11:47:15  [ SessionTracker:62918 ] - [ INFO ]  Expiring session 0x1000042af440001, timeout of 4000ms exceeded
+2020-04-11 11:47:15  [ SyncThread:0:62998 ] - [ DEBUG ]  Processing request:: sessionid:0x1000042af440001 type:closeSession cxid:0x0 zxid:0x21 txntype:-11 reqpath:n/a
+2020-04-11 11:47:15  [ SyncThread:0:62998 ] - [ DEBUG ]  Deleting ephemeral node /test for session 0x1000042af440001
+2020-04-11 11:47:15  [ SyncThread:0:62998 ] - [ DEBUG ]  Removing session 0x1000042af440001
+2020-04-11 11:48:53  [ NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:160999 ] - [ DEBUG ]  Accepted socket connection from /127.0.0.1:55120
+2020-04-11 11:49:13  [ ConnnectionExpirer:180918 ] - [ DEBUG ]  Closed socket connection for client /127.0.0.1:55120 (no session established for client)
+2020-04-11 11:50:34  [ NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:261679 ] - [ DEBUG ]  Accepted socket connection from /127.0.0.1:55140
+2020-04-11 11:50:43  [ NIOWorkerThread-9:270979 ] - [ DEBUG ]  Session establishment request from client /127.0.0.1:55140 client's lastZxid is 0x0
+2020-04-11 11:50:43  [ NIOWorkerThread-9:270979 ] - [ DEBUG ]  Adding session 0x1000042af440002
+2020-04-11 11:50:43  [ NIOWorkerThread-9:270980 ] - [ DEBUG ]  Client attempting to establish new session: session = 0x1000042af440002, zxid = 0x0, timeout = 1000, address = /127.0.0.1:55140
+2020-04-11 11:50:43  [ SyncThread:0:271104 ] - [ DEBUG ]  Processing request:: sessionid:0x1000042af440002 type:createSession cxid:0x0 zxid:0x22 txntype:-10 reqpath:n/a
+2020-04-11 11:50:43  [ SyncThread:0:271104 ] - [ DEBUG ]  sessionid:0x1000042af440002 type:createSession cxid:0x0 zxid:0x22 txntype:-10 reqpath:n/a
+2020-04-11 11:50:43  [ SyncThread:0:271105 ] - [ DEBUG ]  Established session 0x1000042af440002 with negotiated timeout 4000 for client /127.0.0.1:55140
+2020-04-11 11:50:44  [ NIOWorkerThread-11:271547 ] - [ WARN ]  Exception causing close of session 0x1000042af440002: 远程主机强迫关闭了一个现有的连接。
+2020-04-11 11:50:44  [ NIOWorkerThread-11:271547 ] - [ DEBUG ]  IOException stack trace
+java.io.IOException: 远程主机强迫关闭了一个现有的连接。
+	at sun.nio.ch.SocketDispatcher.read0(Native Method)
+	at sun.nio.ch.SocketDispatcher.read(SocketDispatcher.java:43)
+	at sun.nio.ch.IOUtil.readIntoNativeBuffer(IOUtil.java:223)
+	at sun.nio.ch.IOUtil.read(IOUtil.java:197)
+	at sun.nio.ch.SocketChannelImpl.read(SocketChannelImpl.java:380)
+	at org.apache.zookeeper.server.NIOServerCnxn.doIO(NIOServerCnxn.java:321)
+	at org.apache.zookeeper.server.NIOServerCnxnFactory$IOWorkRequest.doWork(NIOServerCnxnFactory.java:530)
+	at org.apache.zookeeper.server.WorkerService$ScheduledWorkRequest.run(WorkerService.java:155)
+	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1142)
+	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:617)
+	at java.lang.Thread.run(Thread.java:748)
+2020-04-11 11:50:44  [ NIOWorkerThread-11:271548 ] - [ DEBUG ]  Unregister MBean [org.apache.ZooKeeperService:name0=StandaloneServer_port2181,name1=Connections,name2=127.0.0.1,name3=0x1000042af440002]
+2020-04-11 11:50:44  [ NIOWorkerThread-11:271548 ] - [ DEBUG ]  Closed socket connection for client /127.0.0.1:55140 which had sessionid 0x1000042af440002
+2020-04-11 11:50:46  [ NIOServerCxnFactory.AcceptThread:0.0.0.0/0.0.0.0:2181:273578 ] - [ DEBUG ]  Accepted socket connection from /127.0.0.1:55142
+2020-04-11 11:50:46  [ NIOWorkerThread-12:273580 ] - [ DEBUG ]  Session establishment request from client /127.0.0.1:55142 client's lastZxid is 0x0
+2020-04-11 11:50:46  [ NIOWorkerThread-12:273580 ] - [ DEBUG ]  Adding session 0x1000042af440003
+2020-04-11 11:50:46  [ NIOWorkerThread-12:273581 ] - [ DEBUG ]  Client attempting to establish new session: session = 0x1000042af440003, zxid = 0x0, timeout = 1000, address = /127.0.0.1:55142
+2020-04-11 11:50:46  [ SyncThread:0:273705 ] - [ DEBUG ]  Processing request:: sessionid:0x1000042af440003 type:createSession cxid:0x0 zxid:0x23 txntype:-10 reqpath:n/a
+2020-04-11 11:50:46  [ SyncThread:0:273707 ] - [ DEBUG ]  sessionid:0x1000042af440003 type:createSession cxid:0x0 zxid:0x23 txntype:-10 reqpath:n/a
+2020-04-11 11:50:46  [ SyncThread:0:273707 ] - [ DEBUG ]  Established session 0x1000042af440003 with negotiated timeout 4000 for client /127.0.0.1:55142
+2020-04-11 11:50:49  [ SessionTracker:276918 ] - [ INFO ]  Expiring session 0x1000042af440002, timeout of 4000ms exceeded
+2020-04-11 11:50:49  [ SyncThread:0:277049 ] - [ DEBUG ]  Processing request:: sessionid:0x1000042af440002 type:closeSession cxid:0x0 zxid:0x24 txntype:-11 reqpath:n/a
+2020-04-11 11:50:49  [ SyncThread:0:277049 ] - [ DEBUG ]  Removing session 0x1000042af440002
+2020-04-11 11:50:51  [ NIOWorkerThread-14:278676 ] - [ WARN ]  Unable to read additional data from client sessionid 0x1000042af440003, likely client has closed socket
+2020-04-11 11:50:51  [ NIOWorkerThread-14:278677 ] - [ DEBUG ]  Unregister MBean [org.apache.ZooKeeperService:name0=StandaloneServer_port2181,name1=Connections,name2=127.0.0.1,name3=0x1000042af440003]
+2020-04-11 11:50:51  [ NIOWorkerThread-14:278678 ] - [ DEBUG ]  Closed socket connection for client /127.0.0.1:55142 which had sessionid 0x1000042af440003
+2020-04-11 11:50:51  [ SessionTracker:278918 ] - [ INFO ]  Expiring session 0x1000042af440003, timeout of 4000ms exceeded
+2020-04-11 11:50:51  [ SyncThread:0:279042 ] - [ DEBUG ]  Processing request:: sessionid:0x1000042af440003 type:closeSession cxid:0x0 zxid:0x25 txntype:-11 reqpath:n/a
+2020-04-11 11:50:51  [ SyncThread:0:279042 ] - [ DEBUG ]  Removing session 0x1000042af440003
