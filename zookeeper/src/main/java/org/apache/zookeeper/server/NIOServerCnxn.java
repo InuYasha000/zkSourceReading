@@ -56,6 +56,7 @@ import org.slf4j.LoggerFactory;
  * client, but only one thread doing the communication.
  */
 //NIOServerCnxn继承了ServerCnxn抽象类，使用NIO来处理与客户端之间的通信，使用单线程处理。
+//NIOServerCnxn维护了服务器与客户端之间的Socket通道、用于存储传输内容的缓冲区、会话ID、ZooKeeper服务器等
 public class NIOServerCnxn extends ServerCnxn {
     private static final Logger LOG = LoggerFactory.getLogger(NIOServerCnxn.class);
     // ServerCnxn工厂
@@ -95,6 +96,8 @@ public class NIOServerCnxn extends ServerCnxn {
 
     private final int outstandingLimit;
 
+    //在构造函数中会对Socket通道进行相应设置，如设置TCP连接无延迟、
+    // 获取客户端的IP地址并将此信息进行记录，方便后续认证，最后设置SelectionKey感兴趣的操作类型为READ。
     public NIOServerCnxn(ZooKeeperServer zk, SocketChannel sock,
                          SelectionKey sk, NIOServerCnxnFactory factory,
                          SelectorThread selectorThread) throws IOException {
@@ -113,9 +116,12 @@ public class NIOServerCnxn extends ServerCnxn {
         }
         sock.socket().setTcpNoDelay(true);
         /* set socket linger to false, so that socket close does not block */
+        // 设置linger为false，以便在socket关闭时不会阻塞
         sock.socket().setSoLinger(false, -1);
+        // 获取IP地址
         InetAddress addr = ((InetSocketAddress) sock.socket()
                 .getRemoteSocketAddress()).getAddress();
+        // 认证信息中添加IP地址
         authInfo.add(new Id("ip", addr.getHostAddress()));
         this.sessionTimeout = factory.sessionlessCnxnTimeout;
     }
@@ -225,6 +231,7 @@ public class NIOServerCnxn extends ServerCnxn {
          * with data from the non-direct buffers that we need to
          * send.
          */
+        // 分配的直接缓冲
         ByteBuffer directBuffer = NIOServerCnxnFactory.getDirectBuffer();
         if (directBuffer == null) {
             ByteBuffer[] bufferList = new ByteBuffer[outgoingBuffers.size()];
@@ -245,15 +252,17 @@ public class NIOServerCnxn extends ServerCnxn {
                 outgoingBuffers.remove();
             }
          } else {
+            // 清除缓冲
             directBuffer.clear();
 
             for (ByteBuffer b : outgoingBuffers) {
-                if (directBuffer.remaining() < b.remaining()) {
+                if (directBuffer.remaining() < b.remaining()) {// directBuffer的剩余空闲长度小于b的剩余空闲长度
                     /*
                      * When we call put later, if the directBuffer is to
                      * small to hold everything, nothing will be copied,
                      * so we've got to slice the buffer if it's too big.
                      */
+                    // 缩小缓冲至directBuffer的大小
                     b = (ByteBuffer) b.slice().limit(
                             directBuffer.remaining());
                 }
@@ -264,10 +273,13 @@ public class NIOServerCnxn extends ServerCnxn {
                  * needed), so we save and reset the position after the
                  * copy
                  */
+                // 记录b的当前position
                 int p = b.position();
+                // 将b写入directBuffer
                 directBuffer.put(b);
+                // 设置回b的原来的position
                 b.position(p);
-                if (directBuffer.remaining() == 0) {
+                if (directBuffer.remaining() == 0) {// 已经写满
                     break;
                 }
             }
@@ -275,28 +287,32 @@ public class NIOServerCnxn extends ServerCnxn {
              * Do the flip: limit becomes position, position gets set to
              * 0. This sets us up for the write.
              */
+            // 翻转缓冲区，可读
             directBuffer.flip();
-
+            // 将directBuffer的内容写入socket
             int sent = sock.write(directBuffer);
 
             ByteBuffer bb;
 
             // Remove the buffers that we have sent
-            while ((bb = outgoingBuffers.peek()) != null) {
+            while ((bb = outgoingBuffers.peek()) != null) {// outgoingBuffers中还存在Buffer
                 if (bb == ServerCnxnFactory.closeConn) {
                     throw new CloseRequestException("close requested");
                 }
-                if (sent < bb.remaining()) {
+                if (sent < bb.remaining()) {// 存在元素未被发送
                     /*
                      * We only partially sent this buffer, so we update
                      * the position and exit the loop.
                      */
+                    // 更新bb的position
                     bb.position(bb.position() + sent);
                     break;
                 }
+                // 发送包，调用ServerCnxn方法
                 packetSent();
                 /* We've sent the whole buffer, so drop the buffer */
                 sent -= bb.remaining();
+                // 已经发送完buffer的所有内容，移除buffer
                 outgoingBuffers.remove();
             }
         }
@@ -321,27 +337,29 @@ public class NIOServerCnxn extends ServerCnxn {
                 return;
             }
             if (k.isReadable()) {
+                // 将内容从socket写入incoming缓冲
                 int rc = sock.read(incomingBuffer);
-                if (rc < 0) {
+                if (rc < 0) {// 流结束异常，无法从客户端读取数据
                     throw new EndOfStreamException(
                             "Unable to read additional data from client sessionid 0x"
                             + Long.toHexString(sessionId)
                             + ", likely client has closed socket");
                 }
-                if (incomingBuffer.remaining() == 0) {
+                if (incomingBuffer.remaining() == 0) {// 缓冲区已经写满
                     boolean isPayload;
                     if (incomingBuffer == lenBuffer) { // start of next request
-                        incomingBuffer.flip();
-                        isPayload = readLength(k);
-                        incomingBuffer.clear();
-                    } else {
+                        incomingBuffer.flip();// 翻转缓冲区，可读
+                        isPayload = readLength(k);// 读取lenBuffer的前四个字节，当读取的是内容长度时则为true，否则为false
+                        incomingBuffer.clear();// 清除缓冲
+                    } else {// 不等，因为在readLength中根据Len已经重新分配了incomingBuffer
                         // continuation
                         isPayload = true;
                     }
                     if (isPayload) { // not the case for 4letterword
+                        // 不为四个字母命令，为实际内容,读取内容
                         readPayload();
                     }
-                    else {
+                    else {// 四个字母，为四字母的命令
                         // four letter words take care
                         // need not do anything else
                         return;
