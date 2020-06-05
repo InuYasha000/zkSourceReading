@@ -61,10 +61,10 @@ public class ZooKeeperServerMain {
      */
     public static void main(String[] args) {
         //加载zookeeper配置文件
-        args = new String[1];
-        args[0] = "E:\\学习项目\\zookeeper\\config\\zoo.cfg";
+//        args = new String[1];
+//        args[0] = "E:\\学习项目\\zookeeper\\config\\zoo.cfg";
         //加载日志配置文件
-        PropertyConfigurator.configure("E:\\学习项目\\zookeeper\\log4j.properties");
+//        PropertyConfigurator.configure("E:\\学习项目\\zookeeper\\log4j.properties");
 
         ZooKeeperServerMain main = new ZooKeeperServerMain();
         try {
@@ -98,6 +98,7 @@ public class ZooKeeperServerMain {
         throws ConfigException, IOException, AdminServerException
     {
         try {
+            //使用jmx管理log4j
             ManagedUtil.registerLog4jMBeans();
         } catch (JMException e) {
             LOG.warn("Unable to register log4j JMX control", e);
@@ -135,6 +136,7 @@ public class ZooKeeperServerMain {
 
             // Registers shutdown handler which will be used to know the
             // server error or shutdown state changes.
+            // 注册一个shutdown handler，当server处于SHUTDOWN, ERROR状态时下面shutdownLatch.await()放行，执行shutdown()
             final CountDownLatch shutdownLatch = new CountDownLatch(1);
             zkServer.registerServerShutdownHandler(
                     new ZooKeeperServerShutdownHandler(shutdownLatch));

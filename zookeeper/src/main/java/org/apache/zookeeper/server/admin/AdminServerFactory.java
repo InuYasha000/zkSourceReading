@@ -38,6 +38,7 @@ public class AdminServerFactory {
      * to pull in Jetty with ZooKeeper.
      */
     public static AdminServer createAdminServer() {
+        //根据系统配置zookeeper.admin.enableServer来决定使用jettyAdminServerC还是DummyAdminServer
         if (!"false".equals(System.getProperty("zookeeper.admin.enableServer"))) {
             try {
                 Class<?> jettyAdminServerC = Class.forName("org.apache.zookeeper.server.admin.JettyAdminServer");

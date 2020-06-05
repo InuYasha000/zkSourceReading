@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
  * 'autopurge.snapRetainCount' number of snapshots and corresponding transaction
  * logs.
  */
+//历史文件清理器
 public class DatadirCleanupManager {
 
     private static final Logger LOG = LoggerFactory.getLogger(DatadirCleanupManager.class);
@@ -40,6 +41,7 @@ public class DatadirCleanupManager {
     /**
      * Status of the dataDir purge task
      */
+    //启动状态
     public enum PurgeTaskStatus {
         NOT_STARTED, STARTED, COMPLETED;
     }
@@ -97,6 +99,7 @@ public class DatadirCleanupManager {
             return;
         }
         // Don't schedule the purge task with zero or negative purge interval.
+        //初次启动时不会清理
         if (purgeInterval <= 0) {
             LOG.info("Purge task is not scheduled.");
             return;

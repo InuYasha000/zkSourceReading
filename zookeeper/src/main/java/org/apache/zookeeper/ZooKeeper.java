@@ -159,6 +159,7 @@ public class ZooKeeper implements AutoCloseable {
     public static final String SECURE_CLIENT = "zookeeper.client.secure";
 
     //--客户端和服务端底层通信接口,和ClientCnxnSocketNetty一起工作
+    //客户端核心线程，包含两个线程，SendThread和EventThread，SendThread是IO线程，主要负责zookeeper客户端和服务端之间的网络I/O通信，EventThread负责对服务端事件进行处理
     protected final ClientCnxn cnxn;
     private static final Logger LOG;
     static {
@@ -167,6 +168,7 @@ public class ZooKeeper implements AutoCloseable {
         Environment.logEnv("Client environment:", LOG);
     }
 
+    //客户端地址列表管理器
     protected final HostProvider hostProvider;
 
     /**
@@ -226,6 +228,7 @@ public class ZooKeeper implements AutoCloseable {
         return cnxn.zooKeeperSaslClient;
     }
 
+    //客户端watcher管理器
     protected final ZKWatchManager watchManager;
 
     private final ZKClientConfig clientConfig;
@@ -892,7 +895,7 @@ public class ZooKeeper implements AutoCloseable {
         cnxn = createConnection(connectStringParser.getChrootPath(),
                 hostProvider, sessionTimeout, this, watchManager,
                 getClientCnxnSocket(), canBeReadOnly);
-        //1--4:初始化sendThread和eventThread
+        //1--4:初始化sendThread和eventThread并启动
         cnxn.start();
     }
 
@@ -1242,7 +1245,7 @@ public class ZooKeeper implements AutoCloseable {
         ConnectStringParser connectStringParser = new ConnectStringParser(
                 connectString);
         hostProvider = aHostProvider;
-
+        //初始化sendThread和eventThread
         cnxn = new ClientCnxn(connectStringParser.getChrootPath(),
                 hostProvider, sessionTimeout, this, watchManager,
                 getClientCnxnSocket(), sessionId, sessionPasswd, canBeReadOnly);
@@ -2150,9 +2153,11 @@ public class ZooKeeper implements AutoCloseable {
         RequestHeader h = new RequestHeader();
         h.setType(ZooDefs.OpCode.getData);
         GetDataRequest request = new GetDataRequest();
+        //数据节点节点路径path
         request.setPath(serverPath);
         //--告诉zookeeperServer这个request是关联watcher，server端检测到该path的数据变化会通知zookeeper客户端，
         //--可以查看调用链关于watcehr的代码--FinalRequestProposal
+         //是否注册watcher的标识
         request.setWatch(watcher != null);
         GetDataResponse response = new GetDataResponse();
         ReplyHeader r = cnxn.submitRequest(h, request, response, wcb);

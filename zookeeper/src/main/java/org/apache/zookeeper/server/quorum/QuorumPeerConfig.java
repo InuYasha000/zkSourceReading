@@ -61,6 +61,7 @@ import static org.apache.zookeeper.common.NetUtils.formatInetAddr;
 //@InterfaceAudience.LimitedPrivate： 仅限于某些本项目的衍生外围项目
 //@InterfaceAudience.Private： 仅限于本项目自身
 @InterfaceAudience.Public
+//zoo.cfg配置文件对应类，详细配置信息可以查看zoo.cfg文件
 public class QuorumPeerConfig {
     private static final Logger LOG = LoggerFactory.getLogger(QuorumPeerConfig.class);
     private static final int UNSET_SERVERID = -1;
@@ -77,6 +78,7 @@ public class QuorumPeerConfig {
     protected File dataDir;
     protected File dataLogDir;
     protected String dynamicConfigFileStr = null;
+    //zookeeper/src/main/resource/zoo.cfg
     protected String configFileStr = null;
     protected int tickTime = ZooKeeperServer.DEFAULT_TICK_TIME;
     protected int maxClientCnxns = 60;
@@ -138,11 +140,13 @@ public class QuorumPeerConfig {
         LOG.info("Reading configuration from: " + path);
        
         try {
+            //zoo.cfg文件
             File configFile = (new VerifyingFileFactory.Builder(LOG)
                 .warnForRelativePath()
                 .failForNonExistingPath()
                 .build()).create(path);
-                
+
+            //配置文件
             Properties cfg = new Properties();
             FileInputStream in = new FileInputStream(configFile);
             try {
@@ -231,8 +235,9 @@ public class QuorumPeerConfig {
     }
 
     /**
-     * Parse config from a Properties.
+     * 配置文件解析（zoo.cfg）
      * @param zkProp Properties to parse from.
+     * 这里就是zoo.cfg文件配置内容
      * @throws IOException
      * @throws ConfigException
      */

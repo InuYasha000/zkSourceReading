@@ -19,13 +19,13 @@ public class Test {
             });
             countDownLatch.await();
             //客户端调用create在集群内创建node，返回成功创建的路径
-            zooKeeper.create("/test","".getBytes(),
-                    ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
-            //同样存在同步和异步
-            zooKeeper.delete("/test",-1);
-            //异步，回调函数中触发事件观察者
-            zooKeeper.exists("/test",false);
-            zooKeeper.getData("/test",false,null);;
+//            zooKeeper.create("/test","".getBytes(),
+//                    ZooDefs.Ids.OPEN_ACL_UNSAFE, CreateMode.EPHEMERAL);
+//            //同样存在同步和异步
+//            zooKeeper.delete("/test",-1);
+//            //异步，回调函数中触发事件观察者
+//            zooKeeper.exists("/test",false);
+//            zooKeeper.getData("/test",false,null);;
         }catch (Exception e){
             e.printStackTrace();
         }

@@ -360,12 +360,12 @@ public final class StaticHostProvider implements HostProvider {
                 needToSleep = (spinDelay > 0);
             }        
             ++currentIndex;
-            if (currentIndex == serverAddresses.size()) {
+            if (currentIndex == serverAddresses.size()) {//循环
                 currentIndex = 0;
             }            
             addr = serverAddresses.get(currentIndex);
             needToSleep = needToSleep || (currentIndex == lastIndex && spinDelay > 0);
-            if (lastIndex == -1) { 
+            if (lastIndex == -1) { //第一次连接不需要sleep
                 // We don't want to sleep on the first ever connect attempt.
                 lastIndex = 0;
             }

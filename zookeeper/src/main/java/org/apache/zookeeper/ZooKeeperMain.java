@@ -153,7 +153,14 @@ public class ZooKeeperMain {
      */
     static class MyCommandOptions {
 
+        //储存 - 开头的参数
+        //-server  -timeout -r
+        //server timeout r储存
         private Map<String,String> options = new HashMap<String,String>();
+        /**
+         * 储存{@link command}
+         * 不是 - 开头的启动参数
+         */
         private List<String> cmdArgs = null;
         private String command = null;
         public static final Pattern ARGS_PATTERN = Pattern.compile("\\s*([^\"\']\\S*|\"[^\"]*\"|'[^']*')\\s*");
@@ -291,7 +298,7 @@ public class ZooKeeperMain {
     
     public static void main(String args[]) throws CliException, IOException, InterruptedException
     {
-        PropertyConfigurator.configure("E:\\学习项目\\zookeeper\\log4j.properties");
+//        PropertyConfigurator.configure("E:\\学习项目\\zookeeper\\log4j.properties");
         ZooKeeperMain main = new ZooKeeperMain(args);
         main.run();
     }

@@ -259,6 +259,8 @@ public class ClientCnxn {
      */
     //4ClientCnxn发送请求到服务端都是将请求数据和响应数据以及连接信息封装到Packet中，包括线程阻塞等待响应结果的到来也是封装在该类中
     static class Packet {
+        //    {private int xid;保存客户端发起请求的顺序，确保响应顺序
+        //     private int type;}标识请求的操作类型，OpCode.create,OpCode.delete,Opcode.getData ,详情见org.apache.zookeeper.ZooDefs.OpCode,除了会话创建请求，客户端请求都会加上请求头
         RequestHeader requestHeader;
 
         ReplyHeader replyHeader;
@@ -1010,7 +1012,7 @@ public class ClientCnxn {
             // Only send if there's a pending watch
             // TODO: here we have the only remaining use of zooKeeper in
             // this class. It's to be eliminated!
-            if (!clientConfig.getBoolean(ZKClientConfig.DISABLE_AUTO_WATCH_RESET)) {
+            if (!clientConfig.getBoolean(ZKClientConfig.DISABLE_AUTO_WATCH_RESET)) {//watcher是否跟着session reconnect重新设置
                 List<String> dataWatches = zooKeeper.getDataWatches();
                 List<String> existWatches = zooKeeper.getExistWatches();
                 List<String> childWatches = zooKeeper.getChildWatches();
@@ -1123,7 +1125,7 @@ public class ClientCnxn {
 
             String hostPort = addr.getHostString() + ":" + addr.getPort();
             MDC.put("myid", hostPort);
-            setName(getName().replaceAll("\\(.*\\)", "(" + hostPort + ")"));
+            setName(getName().replaceAll("\\(.*\\)", "(" + hostPort + ")"));//设置线程名称
             if (clientConfig.isSaslClientEnabled()) {
                 try {
                     if (zooKeeperSaslClient != null) {
@@ -1167,10 +1169,10 @@ public class ClientCnxn {
         public void run() {
             //---在这里赋值给了具体的实现类()  ClientCnxnSocketNIO和ClientCnxnSocketNetty
             clientCnxnSocket.introduce(this, sessionId, outgoingQueue);
-            clientCnxnSocket.updateNow();
-            clientCnxnSocket.updateLastSendAndHeard();
+            clientCnxnSocket.updateNow();//更新clientCnxnSocket#now
+            clientCnxnSocket.updateLastSendAndHeard();//将clientCnxnSocket#now赋值给lastSend
             int to;
-            long lastPingRwServer = Time.currentElapsedTime();
+            long lastPingRwServer = Time.currentElapsedTime();//系统时钟可能会修改，但是纳秒不会
             final int MAX_SEND_PING_INTERVAL = 10000; //10 seconds
             InetSocketAddress serverAddress = null;
             while (state.isAlive()) {
