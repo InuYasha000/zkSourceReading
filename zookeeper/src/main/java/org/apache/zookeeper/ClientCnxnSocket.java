@@ -65,7 +65,7 @@ abstract class ClientCnxnSocket {
     protected long lastHeard;
     protected long lastSend;
     protected long now;
-    protected ClientCnxn.SendThread sendThread;
+    protected ClientCnxn.SendThread sendThread;//来自ClinetCnxn的sendThread
     //1--初始化clientCnxnSocket.introduce(this, sessionId, outgoingQueue);
     //1--ClientCnxn中sendThread的run方法调用这个初始化
     protected LinkedBlockingDeque<Packet> outgoingQueue;

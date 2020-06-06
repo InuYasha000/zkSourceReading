@@ -64,7 +64,7 @@ public final class ConnectStringParser {
         } else {
             this.chrootPath = null;
         }
-
+        //根据','分割
         List<String> hostsList = split(connectString,",");
         for (String host : hostsList) {
             int port = DEFAULT_PORT;

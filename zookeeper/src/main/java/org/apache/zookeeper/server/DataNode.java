@@ -27,6 +27,7 @@ import java.util.Collections;
 import org.apache.jute.InputArchive;
 import org.apache.jute.OutputArchive;
 import org.apache.jute.Record;
+import org.apache.zookeeper.data.ACL;
 import org.apache.zookeeper.data.Stat;
 import org.apache.zookeeper.data.StatPersisted;
 
@@ -37,6 +38,7 @@ import org.apache.zookeeper.data.StatPersisted;
  * array of ACLs, a stat object, and a set of its children's paths.
  * 
  */
+//告诉编译器对被批注的代码元素内部的某些警告保持静默。
 @SuppressFBWarnings("EI_EXPOSE_REP2")
 public class DataNode implements Record {
     /** the data for this datanode */
@@ -175,6 +177,12 @@ public class DataNode implements Record {
         return stat.getEphemeralOwner();
     }
 
+    /**
+     * 反序列化
+     * @param archive 序列化器
+     * @param tag 标签要和序列化标签一致
+     * @throws IOException
+     */
     synchronized public void deserialize(InputArchive archive, String tag)
             throws IOException {
         archive.startRecord("node");
@@ -185,6 +193,12 @@ public class DataNode implements Record {
         archive.endRecord("node");
     }
 
+    /**
+     * 序列化
+     * @param archive 序列化器
+     * @param tag 标签要和反序列化标签一致
+     * @throws IOException
+     */
     synchronized public void serialize(OutputArchive archive, String tag)
             throws IOException {
         archive.startRecord(this, "node");
