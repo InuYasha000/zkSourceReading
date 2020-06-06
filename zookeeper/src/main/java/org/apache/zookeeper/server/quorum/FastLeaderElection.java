@@ -64,7 +64,7 @@ import org.slf4j.LoggerFactory;
 
 //5--recvqueue中存放了选举过程中接收到的消息，这些消息被交给了FastLeaderElection的最核心方法lookForLeader()进行处理以选举出leader。
 // 而sendqueue中存放了待发送出去的消息。
-public class FastLeaderElection implements Election {
+public class   FastLeaderElection implements Election {
     private static final Logger LOG = LoggerFactory.getLogger(FastLeaderElection.class);
 
     /**
