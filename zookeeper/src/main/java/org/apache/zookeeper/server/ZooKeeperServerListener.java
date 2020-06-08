@@ -19,12 +19,14 @@ package org.apache.zookeeper.server;
 
 /**
  * Listener for the critical resource events.
+ * 关键线程事件的监听者
  */
 public interface ZooKeeperServerListener {
 
     /**
      * This will notify the server that some critical thread has stopped.
      * It usually takes place when fatal error occurred.
+     * 当一些错误发生时，他会提醒zkserver一些关键线程抛出异常
      *
      * @param threadName
      *            - name of the thread

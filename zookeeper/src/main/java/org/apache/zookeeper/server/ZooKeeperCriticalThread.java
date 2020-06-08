@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Represents critical thread. When there is an uncaught exception thrown by the
  * thread this will exit the system.
+ * 关键线程，当有一个这个线程抛出一个未被捕捉的异常时，会退出系统（也就是设置zkServer.setState(State.ERROR)，在{@link handleException()}）
  */
 public class ZooKeeperCriticalThread extends ZooKeeperThread {
     private static final Logger LOG = LoggerFactory

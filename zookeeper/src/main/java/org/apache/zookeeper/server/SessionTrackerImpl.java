@@ -46,11 +46,13 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
         SessionTracker {
     private static final Logger LOG = LoggerFactory.getLogger(SessionTrackerImpl.class);
 
+    //根据sessionId管理Session实体
     protected final ConcurrentHashMap<Long, SessionImpl> sessionsById =
         new ConcurrentHashMap<Long, SessionImpl>();
 
     private final ExpiryQueue<SessionImpl> sessionExpiryQueue;
 
+    //根据sessionId管理会话超时时间，该数据结构和zk内存数据库相联通，会被定期持久化到快照文件中
     private final ConcurrentMap<Long, Integer> sessionsWithTimeout;
     private final AtomicLong nextSessionId = new AtomicLong();
 
@@ -61,8 +63,8 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
             isClosing = false;
         }
 
-        final long sessionId;
-        final int timeout;
+        final long sessionId;//每次客户端创建会话，都会分配一个全局唯一的sessionId
+        final int timeout;//会话超时时间，zk客户端向服务端发送这个超时时间，服务端根据自己的超时时间限制最终确定超时时间
         boolean isClosing;
 
         Object owner;
@@ -79,10 +81,11 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
     /**
      * Generates an initial sessionId. High order byte is serverId, next 5
      * 5 bytes are from timestamp, and low order 2 bytes are 0s.
+     * 生成初始sessionId。高8字节是serverId（也就是zk服务器的sid），低56字节来自时间戳
      */
     public static long initializeNextSession(long id) {
         long nextSid;
-        nextSid = (Time.currentElapsedTime() << 24) >>> 8;
+        nextSid = (Time.currentElapsedTime() << 24) >>> 8;//先左移24位，再无符号右移8位，long类型64位
         nextSid =  nextSid | (id <<56);
         if (nextSid == EphemeralType.CONTAINER_EPHEMERAL_OWNER) {
             ++nextSid;  // this is an unlikely edge case, but check it just in case
@@ -153,7 +156,9 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
                 }
 
                 for (SessionImpl s : sessionExpiryQueue.poll()) {
+                    //1标记会话状态为已关闭isClosing = true
                     setSessionClosing(s.sessionId);
+                    //2发起会话关闭请求
                     expirer.expire(s);
                 }
             }
@@ -163,19 +168,30 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
         LOG.info("SessionTrackerImpl exited loop!");
     }
 
+    /**
+     * 客户端会在会话超时时间范围内发送Ping请求来保持会话有效性，也就是心跳检查
+     * 服务端接收到心跳检查后会重新激活客户端会话，这个过程就叫做touchSession
+     * 会话激活过程，不仅能让服务器检测到客户端的存活性，同时也能让客户端自己保持连接状态
+     * @param sessionId
+     * @param timeout
+     * @return
+     */
     synchronized public boolean touchSession(long sessionId, int timeout) {
         SessionImpl s = sessionsById.get(sessionId);
 
+        //检查sessionId是否有效
         if (s == null) {
             logTraceTouchInvalidSession(sessionId, timeout);
             return false;
         }
 
+        //检测会话是否关闭，如果关闭ile就不会再激活了
         if (s.isClosing()) {
             logTraceTouchClosingSession(sessionId, timeout);
             return false;
         }
 
+        //计算新的超时时间
         updateSessionExpiry(s, timeout);
         return true;
     }
@@ -208,6 +224,9 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
         return sessionsWithTimeout.get(sessionId);
     }
 
+    //标记会话状态为已关闭isClosing = true
+    //这样会话清理期间不会再处理客户端新的请求
+    //见touchSession()
     synchronized public void setSessionClosing(long sessionId) {
         if (LOG.isTraceEnabled()) {
             LOG.trace("Session closing: 0x" + Long.toHexString(sessionId));
@@ -289,6 +308,7 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
         return sessionsById.containsKey(sessionId);
     }
 
+    //防止会话迁移带来的数据覆盖bug，参看zookeeper-417，会检查客户端请求owner是否是当前服务器
     public synchronized void checkSession(long sessionId, Object owner)
             throws KeeperException.SessionExpiredException,
             KeeperException.SessionMovedException,
@@ -306,7 +326,7 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
 
         if (session.owner == null) {
             session.owner = owner;
-        } else if (session.owner != owner) {
+        } else if (session.owner != owner) {//不是当前服务器，抛出SessionMovedException异常
             throw new KeeperException.SessionMovedException();
         }
     }

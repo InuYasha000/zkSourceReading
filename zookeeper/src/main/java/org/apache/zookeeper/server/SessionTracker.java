@@ -31,6 +31,9 @@ import org.apache.zookeeper.KeeperException.SessionMovedException;
  * standalone and leader ZooKeeperServer use the same SessionTracker. The
  * FollowerZooKeeperServer uses a SessionTracker which is basically a simple
  * shell to track information to be forwarded to the leader.
+ * 这是zookeperserver用来跟踪会话的基本接口
+ * 单机和leader ZooKeeperServer使用相同的SessionTracker
+ * Follower ZooKeeperServer使用的SessionTracker是一个简单的shell跟踪要转发给leader的信息
  */
 public interface SessionTracker {
     public static interface Session {
@@ -48,6 +51,7 @@ public interface SessionTracker {
 
     /**
      * Add a global session to those being tracked.
+     * 将全局会话添加到正在跟踪的会话中
      * @param id sessionId
      * @param to sessionTimeout
      * @return whether the session was newly added (if false, already existed)
@@ -57,6 +61,7 @@ public interface SessionTracker {
     /**
      * Add a session to those being tracked. The session is added as a local
      * session if they are enabled, otherwise as global.
+     * 将会话添加到正在跟踪的会话中。会话被添加为本地会话（如果已启用），否则为全局会话
      * @param id sessionId
      * @param to sessionTimeout
      * @return whether the session was newly added (if false, already existed)
@@ -72,6 +77,7 @@ public interface SessionTracker {
 
     /**
      * Mark that the session is in the process of closing.
+     * 标记会话正在结束
      * @param sessionId
      */
     void setSessionClosing(long sessionId);

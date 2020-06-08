@@ -27,6 +27,8 @@ public class Time {
      * The difference is that if somebody changes the system clock,
      * Time.currentElapsedTime will change but nanoTime won't. On the other hand,
      * all of ZK assumes that time is measured in milliseconds.
+     * 返回以毫秒为单位的时间
+     * 系统时钟会改变，但是纳秒不会改变，同时zk所有时间单位都是毫秒
      * @return  The time in milliseconds from some arbitrary point in time.
      */
     public static long currentElapsedTime() {
