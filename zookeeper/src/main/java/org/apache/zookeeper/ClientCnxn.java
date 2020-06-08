@@ -1123,7 +1123,7 @@ public class ClientCnxn {
             //--客户端Zookeeper状态state设置为CONNECTING
             state = States.CONNECTING;
 
-            String hostPort = addr.getHostString() + ":" + addr.getPort();
+            String hostPort = addr.getHostString() + ":" + addr.getPort();//127.0.0.1,2181
             MDC.put("myid", hostPort);
             setName(getName().replaceAll("\\(.*\\)", "(" + hostPort + ")"));//设置线程名称
             if (clientConfig.isSaslClientEnabled()) {
