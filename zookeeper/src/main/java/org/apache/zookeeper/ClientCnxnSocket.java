@@ -93,6 +93,7 @@ abstract class ClientCnxnSocket {
         return (int) (now - lastHeard);
     }
 
+    //最后一次发送数据包的时间与当前时间的间隔
     int getIdleSend() {
         return (int) (now - lastSend);
     }

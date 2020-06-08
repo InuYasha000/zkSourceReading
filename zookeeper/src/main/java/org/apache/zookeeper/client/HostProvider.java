@@ -45,7 +45,7 @@ import java.util.Collection;
  */
 @InterfaceAudience.Public
 public interface HostProvider {
-    public int size();
+    public int size();//当前服务器地址列表个数，不能为0
 
     /**
      * The next host to try to connect to.
@@ -55,14 +55,14 @@ public interface HostProvider {
      * @param spinDelay
      *            Milliseconds to wait if all hosts have been tried once.
      */
-    public InetSocketAddress next(long spinDelay);
+    public InetSocketAddress next(long spinDelay);//返回一个InetSocketAddress，这个InetSocketAddress必须是已被解析的InetSocketAddress对象
 
     /**
      * Notify the HostProvider of a successful connection.
      * 
      * The HostProvider may use this notification to reset it's inner state.
      */
-    public void onConnected();
+    public void onConnected();//回调，客户端和服务端建立连接，就通过这个方法通知HostProvider，可以使用这个通知来改变自身内部状态
 
     /**
      * Update the list of servers. This returns true if changing connections is necessary for load-balancing, false otherwise.

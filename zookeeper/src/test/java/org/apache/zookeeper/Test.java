@@ -12,9 +12,9 @@ public class Test {
     public void test1(){
         try {
             CountDownLatch countDownLatch = new CountDownLatch(1);
-            ZooKeeper zooKeeper = new ZooKeeper("127.0.0.1:2181", 1000, new Watcher() {
+            ZooKeeper zooKeeper = new ZooKeeper("127.0.0.1:2181", 10000, new Watcher() {
                 public void process(WatchedEvent event) {
-                    countDownLatch.countDown();
+//                    countDownLatch.countDown();
                 }
             });
             countDownLatch.await();

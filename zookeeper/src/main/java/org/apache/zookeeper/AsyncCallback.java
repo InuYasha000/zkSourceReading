@@ -27,6 +27,7 @@ import org.apache.zookeeper.data.Stat;
  * Interface definitions of asynchronous callbacks.
  * An asynchronous callback is deferred to invoke after a function returns.
  * Asynchronous calls usually improve system efficiency on IO-related APIs.
+ * 异步回调的接口定义
  * <p/>
  * ZooKeeper provides asynchronous version as equivalent to synchronous APIs.
  */
@@ -35,6 +36,7 @@ public interface AsyncCallback {
 
     /**
      * This callback is used to retrieve the stat of the node.
+     * 此回调用于检索节点的状态
      */
     @InterfaceAudience.Public
     interface StatCallback extends AsyncCallback {
@@ -70,6 +72,7 @@ public interface AsyncCallback {
 
     /**
      * This callback is used to retrieve the data and stat of the node.
+     * 此回调用于检索节点的数据和状态
      */
     @InterfaceAudience.Public
     interface DataCallback extends AsyncCallback {
@@ -103,6 +106,7 @@ public interface AsyncCallback {
 
     /**
      * This callback is used to retrieve the ACL and stat of the node.
+     * 此回调用于检索节点的ACL和stat。
      */
     @InterfaceAudience.Public
     interface ACLCallback extends AsyncCallback {
@@ -136,6 +140,7 @@ public interface AsyncCallback {
 
     /**
      * This callback is used to retrieve the children of the node.
+     * 此回调用于检索节点的子节点。
      */
     @InterfaceAudience.Public
     interface ChildrenCallback extends AsyncCallback {
@@ -167,6 +172,7 @@ public interface AsyncCallback {
 
     /**
      * This callback is used to retrieve the children and stat of the node.
+     * 此回调用于检索节点的子节点和状态。
      */
     @InterfaceAudience.Public
     interface Children2Callback extends AsyncCallback {
@@ -189,6 +195,7 @@ public interface AsyncCallback {
 
     /**
      * This callback is used to retrieve the name and stat of the node.
+     * 此回调用于检索节点的名称和状态。
      */
     @InterfaceAudience.Public
     interface Create2Callback extends AsyncCallback {
@@ -212,6 +219,7 @@ public interface AsyncCallback {
 
     /**
      * This callback is used to retrieve the name of the node.
+     * 此回调用于检索节点的名称。
      */
     @InterfaceAudience.Public
     interface StringCallback extends AsyncCallback {
@@ -256,6 +264,7 @@ public interface AsyncCallback {
      * for some APIs that doesn't want anything sent back, e.g. {@link
      * org.apache.zookeeper.ZooKeeper#sync(String,
      * org.apache.zookeeper.AsyncCallback.VoidCallback, Object)}.
+     * 此回调不会从节点检索任何内容。用于一些不希望返回任何内容的api
      */
     @InterfaceAudience.Public
     interface VoidCallback extends AsyncCallback {
@@ -297,6 +306,7 @@ public interface AsyncCallback {
     /**
      * This callback is used to process the multiple results from
      * a single multi call.
+     * 此回调用于处理多个检索
      * See {@link org.apache.zookeeper.ZooKeeper#multi} for more information.
      */
     @InterfaceAudience.Public

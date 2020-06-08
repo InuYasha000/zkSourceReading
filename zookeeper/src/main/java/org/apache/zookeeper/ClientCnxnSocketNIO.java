@@ -287,11 +287,10 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
         sockKey = sock.register(selector, SelectionKey.OP_CONNECT);
         boolean immediateConnect = sock.connect(addr);
         if (immediateConnect) {
-            sendThread.primeConnection();
+            sendThread.primeConnection();//申请建立session关联(在建立tcp连接后)
         }
     }
 
-    //--个人觉得这里就是socket建立tcp链接
     @Override
     void connect(InetSocketAddress addr) throws IOException {
         SocketChannel sock = createSock();
