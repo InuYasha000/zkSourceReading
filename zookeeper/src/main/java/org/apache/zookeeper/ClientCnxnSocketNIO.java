@@ -46,8 +46,10 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
 
     private SelectionKey sockKey;
 
+    //套接字绑定到的本地地址
     private SocketAddress localSocketAddress;
 
+    //返回套接字连接到的远程地址
     private SocketAddress remoteSocketAddress;
 
     ClientCnxnSocketNIO(ZKClientConfig clientConfig) throws IOException {
@@ -88,6 +90,7 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
                     readLength();
                 } else if (!initialized) {//1--也就是当前客户端和服务端之间正在进行会话创建
                     //1--首先判断当前的客户端状态是否是“已初始化”
+                    //将接收到的ByteBuffer(incomebuffer)序列化为ConnectRequest对象
                     readConnectResult();
                     enableRead();
                     if (findSendablePacket(outgoingQueue,
@@ -112,6 +115,7 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
             //---这里才是真正发送给服务端
             //4--并把Packet放入pendingQueue(CLientCnxn接受服务端返回结果的队列)，以便等待服务端响应后进行相应的处理
             //4--p.requestHeader != null&& p.requestHeader.getType() != OpCode.ping&& p.requestHeader.getType() != OpCode.auth
+            //不是很明白这里为什么要传参进去，而不是在方法中直接对outgoingQueue操作
             Packet p = findSendablePacket(outgoingQueue,
                     sendThread.tunnelAuthInProgress());
 
@@ -122,10 +126,9 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
                     if ((p.requestHeader != null) &&
                             (p.requestHeader.getType() != OpCode.ping) &&
                             (p.requestHeader.getType() != OpCode.auth)) {
-                        //1--生成一个客户端请求序号xid设置到packet请求头里面去
+                        //生成一个客户端请求序号xid设置到packet请求头里面去
                         p.requestHeader.setXid(cnxn.getXid());
                     }
-                    //---这里才是真正发送给服务端
                     p.createBB();
                 }
                 sock.write(p.bb);
@@ -137,9 +140,8 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
                             && p.requestHeader.getType() != OpCode.auth) {
                         //1--这个if判断在后面pendingQueue取出来的前面是有判断的（常规的请求，create，getdata，exist）
                         //1--也就是在sendThread.readResponse
-                        //1--ClientCnxn的pendingQueue
                         synchronized (pendingQueue) {
-                            //1---在这里加进去pendingQueue
+                            //在这里加进去pendingQueue,因为pendingQueue储存发送到服务端但需要等待服务端响应的Packet集合
                             pendingQueue.add(p);
                         }
                     }
@@ -191,7 +193,7 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
             if (p.requestHeader == null) {
                 // We've found the priming-packet. Move it to the beginning of the queue.
                 iter.remove();
-                outgoingQueue.addFirst(p);
+                outgoingQueue.addFirst(p);//这里不是造成死循环吗?
                 return p;
             } else {
                 // Non-priming packet: defer it until later, leaving it in the queue
@@ -312,6 +314,7 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
 
     /**
      * Returns the address to which the socket is connected.
+     * 返回套接字连接到的远程地址
      * 
      * @return ip address of the remote side of the connection or null if not
      *         connected
@@ -323,6 +326,7 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
 
     /**
      * Returns the local address to which the socket is bound.
+     * 返回套接字绑定到的本地地址
      * 
      * @return ip address of the remote side of the connection or null if not
      *         connected
@@ -351,7 +355,8 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
     private synchronized void wakeupCnxn() {
         selector.wakeup();
     }
-    
+
+    //负责请求的发送和响应
     @Override
     void doTransport(int waitTimeOut, List<Packet> pendingQueue, ClientCnxn cnxn)
             throws IOException, InterruptedException {
@@ -367,7 +372,7 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
         for (SelectionKey k : selected) {
             SocketChannel sc = ((SocketChannel) k.channel());
             if ((k.readyOps() & SelectionKey.OP_CONNECT) != 0) {
-                if (sc.finishConnect()) {
+                if (sc.finishConnect()) {//已经和服务器建立连接成功后
                     updateLastSendAndHeard();
                     updateSocketAddresses();
                     sendThread.primeConnection();
@@ -433,7 +438,6 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
         return selector;
     }
 
-    //---发送
     @Override
     void sendPacket(Packet p) throws IOException {
         SocketChannel sock = (SocketChannel) sockKey.channel();

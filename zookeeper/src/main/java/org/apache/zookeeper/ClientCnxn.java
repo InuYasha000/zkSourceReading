@@ -133,6 +133,7 @@ public class ClientCnxn {
      */
     //1--ClientCnxnSocketNIO.doIO()回调的时候添加
     //1--SendThread.readResponse()取（if判断之后）
+    //这个也是委托给ClientCnxnSocket,储存发送到服务端但需要等待服务端响应的Packet集合
     private final LinkedList<Packet> pendingQueue = new LinkedList<Packet>();
 
     /**
@@ -886,6 +887,7 @@ public class ClientCnxn {
         private Random r = new Random();
         private boolean isFirstConnect = true;
 
+        //常规请求，比如Create，GetData，Exist等
         void readResponse(ByteBuffer incomingBuffer) throws IOException {
             ByteBufferInputStream bbis = new ByteBufferInputStream(
                     incomingBuffer);
