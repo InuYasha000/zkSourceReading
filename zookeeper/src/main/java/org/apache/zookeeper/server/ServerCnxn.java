@@ -75,24 +75,32 @@ public abstract class ServerCnxn implements Stats, Watcher {
     abstract void close();
 
     // 发送响应
+    //其首先会将header和record都写入baos，之后再将baos转化为ByteBuffer，
+    // 之后在调用sendBuffer来发送缓冲，而sendBuffer完成的操作是将ByteBuffer写入ChannelBuffer中
     public void sendResponse(ReplyHeader h, Record r, String tag) throws IOException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         // Make space for length
         BinaryOutputArchive bos = BinaryOutputArchive.getArchive(baos);
         try {
+            // 向baos中写入四个字节(空)
             baos.write(fourBytes);
+            // 向baos中写入四个字节(空)
             bos.writeRecord(h, "header");
             if (r != null) {
+                // 写入记录
                 bos.writeRecord(r, tag);
             }
             baos.close();
         } catch (IOException e) {
             LOG.error("Error serializing response");
         }
+        // 转化为Byte Array
         byte b[] = baos.toByteArray();
         serverStats().updateClientResponseSize(b.length - 4);
+        // 将Byte Array封装成ByteBuffer
         ByteBuffer bb = ByteBuffer.wrap(b);
         bb.putInt(b.length - 4).rewind();
+        // 发送缓冲
         sendBuffer(bb);
     }
 

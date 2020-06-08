@@ -54,13 +54,20 @@ import org.slf4j.LoggerFactory;
 //--zk底层客户端和服务端通信的接口，默认采用Netty组件作为Socket接口，客户端提交的命令会通过NettyServerCnxn到达服务端
 public class NettyServerCnxn extends ServerCnxn {
     private static final Logger LOG = LoggerFactory.getLogger(NettyServerCnxn.class);
+    // 通道
     private final Channel channel;
     private CompositeByteBuf queuedBuffer;
+    // 节流与否
     private final AtomicBoolean throttled = new AtomicBoolean(false);
+    // Byte缓冲区
     private ByteBuffer bb;
+    // 四个字节的缓冲区
     private final ByteBuffer bbLen = ByteBuffer.allocate(4);
+    // 会话ID
     private long sessionId;
+    // 会话超时时间
     private int sessionTimeout;
+    // 计数
     private AtomicLong outstandingCount = new AtomicLong();
     private Certificate[] clientChain;
     private volatile boolean closingChannel;
@@ -69,9 +76,11 @@ public class NettyServerCnxn extends ServerCnxn {
       * is not currently serving requests (for example if the server is not
       * an active quorum participant.
       */
+    // Zookeeper服务器
     private volatile ZooKeeperServer zkServer;
-
+    // NettyServerCnxn工厂
     private final NettyServerCnxnFactory factory;
+    // 初始化与否
     private boolean initialized;
 
     NettyServerCnxn(Channel channel, ZooKeeperServer zks, NettyServerCnxnFactory factory) {
@@ -79,7 +88,7 @@ public class NettyServerCnxn extends ServerCnxn {
         this.closingChannel = false;
         this.zkServer = zks;
         this.factory = factory;
-        if (this.factory.login != null) {
+        if (this.factory.login != null) {// 需要登录信息(用户名和密码登录)
             this.zooKeeperSaslServer = new ZooKeeperSaslServer(factory.login);
         }
     }
@@ -143,8 +152,10 @@ public class NettyServerCnxn extends ServerCnxn {
         return sessionTimeout;
     }
 
+    //首先创建ReplyHeader，然后再调用sendResponse来发送响应，最后调用close函数进行后续关闭处理
     @Override
     public void process(WatchedEvent event) {
+        // 创建响应头
         ReplyHeader h = new ReplyHeader(-1, -1L, 0);
         if (LOG.isTraceEnabled()) {
             ZooTrace.logTraceMessage(LOG, ZooTrace.EVENT_DELIVERY_TRACE_MASK,
@@ -157,6 +168,7 @@ public class NettyServerCnxn extends ServerCnxn {
         WatcherEvent e = event.getWrapper();
 
         try {
+            // 发送响应
             //--将WatcherEvent事件发给客户端，客户端通过ClinetCnxn接受并向上处理这个WatcherEvent
             //--服务端向客户端发送notification消息，消息内容是WatcherEvent
             sendResponse(h, e, "notification");
@@ -195,6 +207,7 @@ public class NettyServerCnxn extends ServerCnxn {
         }
     };
 
+    //sendBuffer完成的操作是将ByteBuffer写入ChannelBuffer中
     @Override
     public void sendBuffer(ByteBuffer sendBuffer) {
         if (sendBuffer == ServerCnxnFactory.closeConn) {
@@ -210,6 +223,7 @@ public class NettyServerCnxn extends ServerCnxn {
      * than cons'ing up a response fully in memory, which may be large
      * for some commands, this class chunks up the result.
      */
+    //跟NIOServerCnxn一样
     private class SendBufferWriter extends Writer {
         private StringBuffer sb = new StringBuffer();
 
@@ -217,8 +231,9 @@ public class NettyServerCnxn extends ServerCnxn {
          * Check if we are ready to send another chunk.
          * @param force force sending, even if not a full chunk
          */
+        // 是否准备好发送另一块
         private void checkFlush(boolean force) {
-            if ((force && sb.length() > 0) || sb.length() > 2048) {
+            if ((force && sb.length() > 0) || sb.length() > 2048) {// 当强制发送并且sb大小大于0，或者sb大小大于2048即发送缓存
                 sendBuffer(ByteBuffer.wrap(sb.toString().getBytes()));
                 // clear our internal buffer
                 sb.setLength(0);
@@ -228,6 +243,7 @@ public class NettyServerCnxn extends ServerCnxn {
         @Override
         public void close() throws IOException {
             if (sb == null) return;
+            // 关闭之前需要强制性发送缓存
             checkFlush(true);
             sb = null; // clear out the ref to ensure no reuse
         }
@@ -437,7 +453,7 @@ public class NettyServerCnxn extends ServerCnxn {
     private void receiveMessage(ByteBuf message) {
         checkIsInEventLoop("receiveMessage");
         try {
-            while(message.isReadable() && !throttled.get()) {
+            while(message.isReadable() && !throttled.get()) {//当writerIndex > readerIndex，并且不节流时，满足条件
                 if (bb != null) {
                     if (LOG.isTraceEnabled()) {
                         LOG.trace("message readable {} bb len {} {}",
@@ -451,11 +467,14 @@ public class NettyServerCnxn extends ServerCnxn {
                                 ByteBufUtil.hexDump(Unpooled.wrappedBuffer(dat)));
                     }
 
-                    if (bb.remaining() > message.readableBytes()) {
+                    if (bb.remaining() > message.readableBytes()) {// bb剩余空间大于message中可读字节大小
+                        // 确定新的limit
                         int newLimit = bb.position() + message.readableBytes();
                         bb.limit(newLimit);
                     }
+                    // 将message写入bb中
                     message.readBytes(bb);
+                    // 重置bb的limit
                     bb.limit(bb.capacity());
 
                     if (LOG.isTraceEnabled()) {
@@ -469,28 +488,30 @@ public class NettyServerCnxn extends ServerCnxn {
                                 Long.toHexString(sessionId),
                                 ByteBufUtil.hexDump(Unpooled.wrappedBuffer(dat)));
                     }
+                    // 已经读完message，表示内容已经全部接收
                     if (bb.remaining() == 0) {
-                        packetReceived();
-                        bb.flip();
+                        packetReceived();// 统计接收信息
+                        bb.flip();// 翻转，可读
 
                         ZooKeeperServer zks = this.zkServer;
                         if (zks == null || !zks.isRunning()) {
                             throw new IOException("ZK down");
                         }
                         //--客户端第一次连接，
-                        if (initialized) {
+                        if (initialized) {// 未被初始化
                             // TODO: if zks.processPacket() is changed to take a ByteBuffer[],
                             // we could implement zero-copy queueing.
-                            zks.processPacket(this, bb);
+                            zks.processPacket(this, bb);// 处理bb中包含的包信息
 
-                            if (zks.shouldThrottle(outstandingCount.incrementAndGet())) {
-                                disableRecvNoWait();
+                            if (zks.shouldThrottle(outstandingCount.incrementAndGet())) {// 是否已经节流
+                                disableRecvNoWait();// 不接收数据
                             }
                         } else {//--否则调用ZookeeperServerprocessConnectRequest
                             if (LOG.isDebugEnabled()) {
                                 LOG.debug("got conn req request from {}",
                                         getRemoteSocketAddress());
                             }
+                            // 处理连接请求
                             zks.processConnectRequest(this, bb);
                             initialized = true;
                         }
@@ -501,7 +522,9 @@ public class NettyServerCnxn extends ServerCnxn {
                         LOG.trace("message readable {} bblenrem {}",
                                 message.readableBytes(),
                                 bbLen.remaining());
+                        // 复制bbLen缓冲
                         ByteBuffer dat = bbLen.duplicate();
+                        // 翻转
                         dat.flip();
                         LOG.trace("0x{} bbLen {}",
                                 Long.toHexString(sessionId),
@@ -513,7 +536,8 @@ public class NettyServerCnxn extends ServerCnxn {
                     }
                     message.readBytes(bbLen);
                     bbLen.limit(bbLen.capacity());
-                    if (bbLen.remaining() == 0) {
+                    if (bbLen.remaining() == 0) {// 已经读完message，表示内容已经全部接收
+                        // 翻转
                         bbLen.flip();
 
                         if (LOG.isTraceEnabled()) {
@@ -521,13 +545,14 @@ public class NettyServerCnxn extends ServerCnxn {
                                     Long.toHexString(sessionId),
                                     ByteBufUtil.hexDump(Unpooled.wrappedBuffer(bbLen)));
                         }
+                        // 读取position后四个字节
                         int len = bbLen.getInt();
                         if (LOG.isTraceEnabled()) {
                             LOG.trace("0x{} bbLen len is {}",
                                     Long.toHexString(sessionId),
                                     len);
                         }
-
+                        // 清除缓存
                         bbLen.clear();
                         if (!initialized) {
                             if (checkFourLetterWord(channel, message, len)) {
@@ -537,6 +562,7 @@ public class NettyServerCnxn extends ServerCnxn {
                         if (len < 0 || len > BinaryInputArchive.maxBuffer) {
                             throw new IOException("Len error " + len);
                         }
+                        // 根据len重新分配缓冲，以便接收内容
                         bb = ByteBuffer.allocate(len);
                     }
                 }
