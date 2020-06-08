@@ -40,9 +40,10 @@ import org.slf4j.LoggerFactory;
 /**
  * A ClientCnxnSocket does the lower level communication with a socket
  * implementation.
- * 
+ * ClientCnxnSocket与socket进行底层通信执行
  * This code has been moved out of ClientCnxn so that a Netty implementation can
  * be provided as an alternative to the NIO socket code.
+ * 此代码已从ClientCnxn中移出，因此Netty实现可以作为NIO套接字代码的替代
  * 
  */
 abstract class ClientCnxnSocket {
@@ -52,16 +53,18 @@ abstract class ClientCnxnSocket {
 
     /**
      * This buffer is only used to read the length of the incoming message.
+     * 此缓冲区仅用于读取传入消息的长度
      */
     protected final ByteBuffer lenBuffer = ByteBuffer.allocateDirect(4);
 
     /**
      * After the length is read, a new incomingBuffer is allocated in
      * readLength() to receive the full message.
+     * 读取长度后，在readLength（）接收完整消息
      */
     protected ByteBuffer incomingBuffer = lenBuffer;
-    protected final AtomicLong sentCount = new AtomicLong(0L);
-    protected final AtomicLong recvCount = new AtomicLong(0L);
+    protected final AtomicLong sentCount = new AtomicLong(0L);//发送次数
+    protected final AtomicLong recvCount = new AtomicLong(0L);//接收次数
     protected long lastHeard;
     protected long lastSend;
     protected long now;
@@ -75,6 +78,7 @@ abstract class ClientCnxnSocket {
     /**
      * The sessionId is only available here for Log and Exception messages.
      * Otherwise the socket doesn't need to know it.
+     * sessionId仅在此处可用于日志和异常消息。否则套接字不需要知道它
      */
     protected long sessionId;
 
@@ -89,10 +93,12 @@ abstract class ClientCnxnSocket {
         now = Time.currentElapsedTime();
     }
 
+    //最后一次接收数据包的时间与当前时间的间隔
     int getIdleRecv() {
         return (int) (now - lastHeard);
     }
 
+    //最后一次发送数据包的时间与当前时间的间隔
     int getIdleSend() {
         return (int) (now - lastSend);
     }
@@ -165,11 +171,13 @@ abstract class ClientCnxnSocket {
 
     /**
      * Returns the address to which the socket is connected.
+     * 返回套接字连接到的远程地址
      */
     abstract SocketAddress getRemoteSocketAddress();
 
     /**
      * Returns the address to which the socket is bound.
+     * 返回套接字绑定到的本地地址
      */
     abstract SocketAddress getLocalSocketAddress();
 

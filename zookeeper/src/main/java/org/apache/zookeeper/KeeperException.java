@@ -322,6 +322,7 @@ public abstract class KeeperException extends Exception {
      * types. This enum replaces the deprecated earlier static final int
      * constants. The old, deprecated, values are in "camel case" while the new
      * enum values are in all CAPS.
+     * 表示各种KeeperException的代码类型。此枚举将替换已弃用的早期静态final int常数。旧的、不推荐的值是“camel case”，而新的枚举值全部大写
      */
     @InterfaceAudience.Public
     public static enum Code implements CodeDeprecated {

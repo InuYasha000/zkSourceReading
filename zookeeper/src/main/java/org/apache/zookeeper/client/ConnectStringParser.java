@@ -28,17 +28,19 @@ import static org.apache.zookeeper.common.StringUtils.split;
 
 /**
  * A parser for ZooKeeper Client connect strings.
- * 
+ * ZooKeeper客户端连接字符串的分析器
  * This class is not meant to be seen or used outside of ZooKeeper itself.
- * 
+ * 这个类不应该在ZooKeeper本身之外被看到或使用
  * The chrootPath member should be replaced by a Path object in issue
  * ZOOKEEPER-849.
  * 
  * @see org.apache.zookeeper.ZooKeeper
  */
+//对传入的connectString做两个主要处理，解析chrootpath，保存服务器地址列表
 public final class ConnectStringParser {
     private static final int DEFAULT_PORT = 2181;
 
+    //客户端隔离命名空间，传给ClientCnxn.chrootPath
     private final String chrootPath;
 
     private final ArrayList<InetSocketAddress> serverAddresses = new ArrayList<InetSocketAddress>();

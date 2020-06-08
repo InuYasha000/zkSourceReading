@@ -289,6 +289,7 @@ public class ZooKeeper implements AutoCloseable {
                 throws KeeperException {
             // Validate the provided znode path contains the given watcher of
             // watcherType
+            //检查给定的节点路径是否包含指定的watcher和watcherType（实际就是Set<Watcher> watches判断是否有某个watcher）
             containsWatcher(clientPath, watcher, watcherType);
 
             Map<EventType, Set<Watcher>> removedWatchers = new HashMap<EventType, Set<Watcher>>();
@@ -365,6 +366,7 @@ public class ZooKeeper implements AutoCloseable {
         /**
          * Validate the provided znode path contains the given watcher and
          * watcherType
+         * 检查给定的节点路径是否包含指定的watcher和watcherType
          * 
          * @param path
          *            - client path
@@ -468,7 +470,7 @@ public class ZooKeeper implements AutoCloseable {
             Set<Watcher> result = new HashSet<Watcher>();
 
             switch (type) {
-            case None:
+            case None://--建立连接
                 result.add(defaultWatcher);
                 boolean clear = disableAutoWatchReset && state != Watcher.Event.KeeperState.SyncConnected;
                 synchronized(dataWatches) {
@@ -578,6 +580,7 @@ public class ZooKeeper implements AutoCloseable {
          * @param rc the result code of the operation that attempted to add the
          * watch on the node
          * @return true if the watch should be added, otw false
+         * 看这个类org.apache.zookeeper.KeeperException.CodeDeprecated#Ok就明白了
          */
         protected boolean shouldAddWatch(int rc) {
             return rc == 0;
