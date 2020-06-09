@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
  * There will be an instance of this class created by the Leader for each
  * learner. All communication with a learner is handled by this
  * class.
+ * 一个LearnerHandler对应一个Leader和Learner服务器之间的连接，负责两者之间的所有的消息通信和同步
  */
 public class LearnerHandler extends ZooKeeperThread {
     private static final Logger LOG = LoggerFactory.getLogger(LearnerHandler.class);
@@ -73,6 +74,10 @@ public class LearnerHandler extends ZooKeeperThread {
      * it's based on the initLimit, if we are done bootstrapping it's based
      * on the syncLimit. Once the deadline is past this learner should
      * be considered no longer "sync'd" with the leader. */
+    //接收下一个ack确认包的截止时间
+    //如果我们连接阶段这个值是initLimit(集群中的follower服务器(F)与leader服务器(L)之间初始连接时能容忍的最多心跳数（tickTime的数量）)
+    //否则是syncLimit(集群中的follower服务器与leader服务器之间请求和应答之间能容忍的最多心跳数)
+    //超过这个数这个learner将考虑不再和leader同步
     volatile long tickOfNextAckDeadline;
     
     /**

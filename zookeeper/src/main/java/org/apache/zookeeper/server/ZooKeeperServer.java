@@ -78,6 +78,7 @@ import org.slf4j.LoggerFactory;
  * This class implements a simple standalone ZooKeeperServer. It sets up the
  * following chain of RequestProcessors to process requests:
  * PrepRequestProcessor -> SyncRequestProcessor -> FinalRequestProcessor
+ * 单机zkServer
  */
 //--响应Zookeeper客户端请求类
     //--使用nettyServerCnxn作为底层Socket通信机制
@@ -119,6 +120,8 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      * it's more of a checksum that's used in reconnection, which carries no
      * security weight, and is treated internally as if it carries no
      * security weight.
+     * 这就是我们用来生成密码的秘密
+     * 就目前而言，它更多的是用于重连的校验和
      */
     static final private long superSecret = 0XB3415C00L;
 
@@ -135,7 +138,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     protected ServerCnxnFactory serverCnxnFactory;
     protected ServerCnxnFactory secureServerCnxnFactory;
 
-    private final ServerStats serverStats;
+    private final ServerStats serverStats;//zk服务器运行时统计器
     private final ZooKeeperServerListener listener;
     private ZooKeeperServerShutdownHandler zkShutdownHandler;
     private volatile int createSessionTrackerServerId = 1;

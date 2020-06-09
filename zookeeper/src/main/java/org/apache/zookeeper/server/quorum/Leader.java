@@ -101,6 +101,7 @@ public class Leader {
     protected boolean quorumFormed = false;
 
     // the follower acceptor thread
+    //follower acceptor线程
     volatile LearnerCnxAcceptor cnxAcceptor = null;
 
     // list of all the followers
@@ -404,6 +405,7 @@ public class Leader {
 
                         BufferedInputStream is = new BufferedInputStream(
                                 s.getInputStream());
+                        //创建LearnerHandler线程，一个LearnerHandler对应一个Leader和Learner服务器之间的连接，负责两者之间的所有的消息通信和同步
                         LearnerHandler fh = new LearnerHandler(s, is, Leader.this);
                         fh.start();
                     } catch (SocketException e) {
@@ -463,6 +465,7 @@ public class Leader {
      */
     void lead() throws IOException, InterruptedException {
         self.end_fle = Time.currentElapsedTime();
+        //选举耗时，单位毫秒
         long electionTimeTaken = self.end_fle - self.start_fle;
         self.setElectionTimeTaken(electionTimeTaken);
         LOG.info("LEADING - LEADER ELECTION TOOK - {} {}", electionTimeTaken,
@@ -470,6 +473,7 @@ public class Leader {
         self.start_fle = 0;
         self.end_fle = 0;
 
+        //注册LeaderBean到JMX
         zk.registerJMX(new LeaderBean(this, zk), self.jmxLocalPeerBean);
 
         try {
@@ -481,6 +485,7 @@ public class Leader {
 
             // Start thread that waits for connection requests from
             // new followers.
+            //follower acceptor线程,等待follower建立连接
             cnxAcceptor = new LearnerCnxAcceptor();
             cnxAcceptor.start();
             //6-2：-启用新的epoch，zookeeper中zixd是64位，用于唯一标识一个操作，zxid的高32位是epoch，每次Leader切换+1，低32位是序列号，每次操作+1

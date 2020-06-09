@@ -27,17 +27,17 @@ import org.apache.zookeeper.server.quorum.QuorumPeer.QuorumServer;
  * All quorum validators have to implement a method called
  * containsQuorum, which verifies if a HashSet of server 
  * identifiers constitutes a quorum.
- *
+ * 选举算法中的选举算法接口
  */
 
 public interface QuorumVerifier {
-    long getWeight(long id);
-    boolean containsQuorum(Set<Long> set);
+    long getWeight(long id);//权重
+    boolean containsQuorum(Set<Long> set);//大多数选举算法
     long getVersion();
     void setVersion(long ver);
-    Map<Long, QuorumServer> getAllMembers();
-    Map<Long, QuorumServer> getVotingMembers();
-    Map<Long, QuorumServer> getObservingMembers();
+    Map<Long, QuorumServer> getAllMembers();//返回所有参与者
+    Map<Long, QuorumServer> getVotingMembers();//返回选举的所有服务器
+    Map<Long, QuorumServer> getObservingMembers();//返回观察者
     boolean equals(Object o);
     String toString();
 }

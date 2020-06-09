@@ -39,6 +39,10 @@ import org.slf4j.LoggerFactory;
  * zookeeper MBeans with the platform MBean server. It builds a hierarchy of MBeans
  * where each MBean represented by a filesystem-like path. Eventually, this hierarchy
  * will be stored in the zookeeper data tree instance as a virtual data tree.
+ * 提供了注册和注销zk MBean的统一接口
+ * 每个MBean由类似文件系统的路径表示
+ * 存储在zookeeper数据树实例中
+ * 由一个map结构mapBean2Path储存
  */
 public class MBeanRegistry {
     private static final Logger LOG = LoggerFactory.getLogger(MBeanRegistry.class);
@@ -46,7 +50,9 @@ public class MBeanRegistry {
     private static volatile MBeanRegistry instance = new MBeanRegistry();
     
     private final Object LOCK = new Object();
-    
+
+    //key:ZKMBeanInfo
+    //value:路径
     private Map<ZKMBeanInfo, String> mapBean2Path =
         new ConcurrentHashMap<ZKMBeanInfo, String>();
     
@@ -85,7 +91,8 @@ public class MBeanRegistry {
     }
 
     /**
-     * Registers a new MBean with the platform MBean server. 
+     * Registers a new MBean with the platform MBean server.
+     * 注册MBean
      * @param bean the bean being registered
      * @param parent if not null, the new bean will be registered as a child
      * node of this parent.
@@ -99,6 +106,7 @@ public class MBeanRegistry {
             path = mapBean2Path.get(parent);
             assert path != null;
         }
+        //将path拼到parent.getName的前面，path为空，则拼接'/'
         path = makeFullPath(path, parent);
         if(bean.isHidden())
             return;
@@ -158,6 +166,7 @@ public class MBeanRegistry {
 
     /**
      * Generate a filesystem-like path.
+     * //將name拼成路径
      * @param prefix path prefix
      * @param name path elements
      * @return absolute path
@@ -183,6 +192,7 @@ public class MBeanRegistry {
     /**
      * This takes a path, such as /a/b/c, and converts it to 
      * name0=a,name1=b,name2=c
+     * /a/b/c->name0=a,name1=b,name2=c,返回序号
      */
     private int tokenize(StringBuilder sb, String path, int index){
         String[] tokens = path.split("/");
@@ -207,8 +217,10 @@ public class MBeanRegistry {
             return null;
         StringBuilder beanName = new StringBuilder(CommonNames.DOMAIN + ":");
         int counter=0;
+        //counter+=path的‘/’个数+1
         counter=tokenize(beanName,path,counter);
         tokenize(beanName,bean.getName(),counter);
+        //去掉末尾','
         beanName.deleteCharAt(beanName.length()-1);
         try {
             return new ObjectName(beanName.toString());

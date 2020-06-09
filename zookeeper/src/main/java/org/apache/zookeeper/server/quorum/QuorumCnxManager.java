@@ -141,7 +141,7 @@ public class QuorumCnxManager {
      */
     //5--发送器集合。每个SenderWorker消息发送器，都对应一台远程ZooKeeper服务器，负责消息的发送，在这个集合中，key
     final ConcurrentHashMap<Long, SendWorker> senderWorkerMap;
-    //5--发送队列，每个机器占据一条记录，key=sid,网络发送的队列
+    //5--发送队列，每个机器占据一条记录，key=sid(quorumpeer的地址),网络发送的队列
     //5--SendWorker线程发送
     final ConcurrentHashMap<Long, ArrayBlockingQueue<ByteBuffer>> queueSendMap;
     //5--最近发送过的消息。在这个集合中，为每个SID保留最近发送过的一个消息

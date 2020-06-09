@@ -129,7 +129,9 @@ public class ZooKeeperServerMain {
             // so rather than spawning another thread, we will just call
             // run() in this thread.
             // create a file logger url from the command line args
+            //创建FileTxnSnapLog
             txnLog = new FileTxnSnapLog(config.dataLogDir, config.dataDir);
+            //设置服务器参数
             final ZooKeeperServer zkServer = new ZooKeeperServer(txnLog,
                     config.tickTime, config.minSessionTimeout, config.maxSessionTimeout, null);
             txnLog.setServerStats(zkServer.serverStats());
@@ -148,10 +150,14 @@ public class ZooKeeperServerMain {
 
             boolean needStartZKServer = true;
             if (config.getClientPortAddress() != null) {
+                //初始化ServerCnxnFactory
+                //可以通过这个配置来指定zk服务端网络连接工厂是NIO还是netty框架 zookeeper.serverCnxnFactory
                 cnxnFactory = ServerCnxnFactory.createFactory();
                 cnxnFactory.configure(config.getClientPortAddress(), config.getMaxClientCnxns(), false);
+                //启动ServerCnxnFactory
                 cnxnFactory.startup(zkServer);
                 // zkServer has been started. So we don't need to start it again in secureCnxnFactory.
+                //ServerCnxnFactory已经启动了zks.startdata()和zks.startup();防止ServerCnxnFactory再次启动
                 needStartZKServer = false;
             }
             if (config.getSecureClientPortAddress() != null) {

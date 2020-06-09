@@ -84,7 +84,7 @@ public class Vote {
     }
 
     final private int version;
-    //被选举leader的服务器ID
+    //被选举leader的服务器ID(myid)
     final private long id;
     //被选举leader的事务ID
     final private long zxid;

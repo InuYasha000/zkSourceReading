@@ -118,11 +118,14 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
 
     private QuorumBean jmxQuorumBean;
     LocalPeerBean jmxLocalPeerBean;
+    //key:QuorumPeer.QuorumServer.id,value:QuorumBean
     private Map<Long, RemotePeerBean> jmxRemotePeerBean;
     LeaderElectionBean jmxLeaderElectionBean;
 
     // The QuorumCnxManager is held through an AtomicReference to ensure cross-thread visibility
     // of updates; see the implementation comment at setLastSeenQuorumVerifier().
+    //QuorumCnxManager通过AtomicReference来保持以确保不同线程可见性
+    //setLastSeenQuorumVerifier()
     private AtomicReference<QuorumCnxManager> qcmRef = new AtomicReference<>();
 
     QuorumAuthServer authServer;
@@ -134,6 +137,9 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
      * instantiated later. Also, it is created once on
      * bootup and only thrown away in case of a truncate
      * message from the leader
+     * ZKDatabase是quorumpeer的顶级成员
+     * 在所有的zookeeperservers中都使用
+     * 在zkserver启动时创建
      */
     private ZKDatabase zkDb;
 
@@ -508,6 +514,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
 
     /**
      * This is who I think the leader currently is.
+     * 选举投票信息
      */
     volatile private Vote currentVote;
 
@@ -523,6 +530,8 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
 
     /**
      * The number of milliseconds of each tick
+     * Client-Server通信心跳时间
+     * Zookeeper 服务器之间或客户端与服务器之间维持心跳的时间间隔，也就是每个 tickTime 时间就会发送一个心跳。tickTime以毫秒为单位
      */
     protected int tickTime;
 
@@ -552,12 +561,16 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
 
     /**
      * The number of ticks that the initial synchronization phase can take
+     * Leader-Follower初始通信时限
+     * 集群中的follower服务器(F)与leader服务器(L)之间初始连接时能容忍的最多心跳数（tickTime的数量）
      */
     protected int initLimit;
 
     /**
      * The number of ticks that can pass between sending a request and getting
      * an acknowledgment
+     * follower等待leader回复的最大时间
+     * 集群中的follower服务器与leader服务器之间请求和应答之间能容忍的最多心跳数
      */
     protected int syncLimit;
     
@@ -581,6 +594,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
     /**
      * Keeps time taken for leader election in milliseconds. Sets the value to
      * this variable only after the completion of leader election.
+     * 选举耗时，单位毫秒
      */
     private long electionTimeTaken = -1;
 
@@ -891,7 +905,9 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
         if (!getView().containsKey(myid)) {
             throw new RuntimeException("My id " + myid + " not in the peer list");
          }
+        //恢复本地数据
         loadDataBase();
+        //启动ServerCnxnFactory
         startServerCnxnFactory();
         try {
             adminServer.start();
@@ -899,8 +915,9 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
             LOG.warn("Problem starting AdminServer", e);
             System.out.println(e);
         }
-        //开始选举
+        //初始化Leader选举
         startLeaderElection();
+        //启动QuorumPeer
         super.start();
     }
 
@@ -1151,11 +1168,13 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
     //主线程，管理QuoRumPeer循环在FastLeadingElection，Leader，Follower，Observer之间切换
     @Override
     public void run() {
+        //更新线程名称为 QuorumPeer[myid=%d](plain=%s)(secure=%s)
         updateThreadName();
 
         LOG.debug("Starting quorum peer");
         try {
             jmxQuorumBean = new QuorumBean(this);
+            //注册jmxQuorumBean到MBean Server
             MBeanRegistry.getInstance().register(jmxQuorumBean, null);
             for(QuorumServer s: getView().values()){
                 ZKMBeanInfo p;
@@ -1186,6 +1205,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
             /*
              * Main loop
              */
+            //检测当前服务器状态，起始状态是ServerState.LOOKING
             while (running) {
                 switch (getPeerState()) {
                 case LOOKING:
@@ -1281,7 +1301,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                        updateServerState();
                     }
                     break;
-                case LEADING://6--选举完成后，Peer确认自己是leader的身份，
+                case LEADING://选举完成后，Peer确认自己是leader的身份，
                     LOG.info("LEADING");
                     try {
                         setLeader(makeLeader(logFactory));

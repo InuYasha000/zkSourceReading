@@ -24,6 +24,7 @@ import java.net.InetSocketAddress;
 
 /**
  * This class contains common utilities for netstuff. Like printing IPv6 literals correctly
+ * 打印IPv6地址
  */
 public class NetUtils {
 

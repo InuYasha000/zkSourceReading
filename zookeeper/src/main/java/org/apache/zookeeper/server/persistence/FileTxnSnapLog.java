@@ -45,14 +45,16 @@ import org.slf4j.LoggerFactory;
  * above the implementations
  * of txnlog and snapshot
  * classes
+ * zk上层服务器和底层数据之间的对接层，提供一系列操作文件的接口，包括事务日志文件和快照数据文件
+ * 根据config.dataLogDir, config.dataDir创建FileTxnSnapLog
  */
 public class FileTxnSnapLog {
     //the direcotry containing the
     //the transaction logs
-    private final File dataDir;
+    private final File dataDir;//config.dataLogDir,数据文件目录
     //the directory containing the
     //the snapshot directory
-    private final File snapDir;
+    private final File snapDir;//config.dataDir
     private TxnLog txnLog;
     private SnapShot snapLog;
     private final boolean trustEmptySnapshot;

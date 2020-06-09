@@ -23,6 +23,8 @@ package org.apache.zookeeper.server.quorum;
  * A local zookeeper server MBean interface. Unlike the remote peer, the local
  * peer provides complete state/statistics at runtime and can be managed (just 
  * like a standalone zookeeper server).
+ * 本地zookeeper服务器MBean接口
+ * 在运行时提供完整的状态/统计信息，并且可以进行管理
  */
 public interface LocalPeerMXBean extends ServerMXBean {
     

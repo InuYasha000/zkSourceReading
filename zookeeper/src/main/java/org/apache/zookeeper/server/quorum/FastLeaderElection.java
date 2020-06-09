@@ -79,6 +79,7 @@ public class   FastLeaderElection implements Election {
      * Upper bound on the amount of time between two consecutive
      * notification checks. This impacts the amount of time to get
      * the system up again after long partitions. Currently 60 seconds.
+     * 最大通知时间间隔
      */
 
     final static int maxNotificationInterval = 60000;
@@ -151,6 +152,9 @@ public class   FastLeaderElection implements Election {
      * Messages that a peer wants to send to other peers.
      * These messages can be both Notifications and Acks
      * of reception of notification.
+     * 发送给别的QuorumPeers的Message结构
+     * 消息通知
+     * ack回复
      */
     static public class ToSend {
         static enum mType {crequest, challenge, notification, ack}
@@ -175,21 +179,25 @@ public class   FastLeaderElection implements Election {
 
         /*
          * Proposed leader in the case of notification
+         * 选举时通知给别的服务端的leader
          */
         long leader;
 
         /*
          * id contains the tag for acks, and zxid for notifications
+         * zookeeper中zxid是64位，用于唯一标识一个操作，zxid的高32位是epoch，每次Leader切换+1，低32位是序列号，每次操作+1
          */
         long zxid;
 
         /*
          * Epoch
+         * 选举周期
          */
         long electionEpoch;
 
         /*
          * Current state;
+         * 当前QuorumPeer状态
          */
         QuorumPeer.ServerState state;
 
@@ -800,6 +808,7 @@ public class   FastLeaderElection implements Election {
      * electing over and over a peer that has crashed and it is no
      * longer leading.
      *
+     *
      * @param votes set of votes
      * @param   leader  leader id
      * @param   electionEpoch   epoch id
@@ -904,6 +913,7 @@ public class   FastLeaderElection implements Election {
      * Starts a new round of leader election. Whenever our QuorumPeer
      * changes its state to LOOKING, this method is invoked, and it
      * sends notifications to all other peers.
+     * 开始新一轮选举，当QuorumPeer状态变为LOOKING，调用这个方法通知其他的QuorumPeer
      */
     public Vote lookForLeader() throws InterruptedException {
         try {
@@ -918,7 +928,7 @@ public class   FastLeaderElection implements Election {
            self.start_fle = Time.currentElapsedTime();
         }
         try {
-            //--储存收到的Notication
+            //--储存收到的Notication,这个用来做选举里面的大多数判断
             HashMap<Long, Vote> recvset = new HashMap<Long, Vote>();
 
             HashMap<Long, Vote> outofelection = new HashMap<Long, Vote>();
@@ -928,7 +938,7 @@ public class   FastLeaderElection implements Election {
             synchronized(this){
                 //5--更新选举周期
                 logicalclock.incrementAndGet();
-                //5--把自己作为leader作为投票发给其它,这个时候并未发送出去，下面才是广播发送
+                //5--先把把自己作为leader
                 updateProposal(getInitId(), getInitLastLoggedZxid(), getPeerEpoch());
             }
 
@@ -963,7 +973,7 @@ public class   FastLeaderElection implements Election {
                         sendNotifications();
                     } else {
                         //5--重连
-                        //5--queueSendMap的key是每台机器的sid
+                        //5--queueSendMap的key是quorumpeer的地址
                         manager.connectAll();
                     }
 
@@ -988,7 +998,7 @@ public class   FastLeaderElection implements Election {
                         //如果electionEpoch相等则取zxid较大的
                         //如果zxid相等则取myid较大的
                         // If notification > current, replace and send messages out
-                        //5--对方投票周期大于自己IDE
+                        //5--对方投票周期大于自己的
                         if (n.electionEpoch > logicalclock.get()) {
                             logicalclock.set(n.electionEpoch);
                             //5--投票集合清空
@@ -1006,7 +1016,7 @@ public class   FastLeaderElection implements Election {
                             }
                             //5--告诉其他人
                             sendNotifications();
-                        } else if (n.electionEpoch < logicalclock.get()) {//5--忽略对方投票
+                        } else if (n.electionEpoch < logicalclock.get()) {//5--忽略对方投票，对方投票周期小于自己
                             if(LOG.isDebugEnabled()){
                                 LOG.debug("Notification election epoch is smaller than logicalclock. n.electionEpoch = 0x"
                                         + Long.toHexString(n.electionEpoch)
@@ -1014,7 +1024,7 @@ public class   FastLeaderElection implements Election {
                             }
                             break;
                         } else if (totalOrderPredicate(n.leader, n.zxid, n.peerEpoch,
-                                proposedLeader, proposedZxid, proposedEpoch)) {//5--周期相同，跟第一个条件一样的比较
+                                proposedLeader, proposedZxid, proposedEpoch)) {//5--周期相同
                             updateProposal(n.leader, n.zxid, n.peerEpoch);
                             //5--告诉其他人
                             sendNotifications();
@@ -1028,6 +1038,7 @@ public class   FastLeaderElection implements Election {
                         }
 
                         // don't care about the version if it's in LOOKING state
+                        //记录收到的选举信息
                         recvset.put(n.sid, new Vote(n.leader, n.zxid, n.electionEpoch, n.peerEpoch));
 
                         //5--判断当前候选人proposedLeader，proposedZxid，proposedEpoch在选票中是否占了大多数？？？不清楚怎么判断的--

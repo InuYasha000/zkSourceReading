@@ -761,6 +761,7 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory {
         start();
         setZooKeeperServer(zks);
         if (startServer) {
+            //启动ZKDatabase
             zks.startdata();
             zks.startup();
         }

@@ -29,16 +29,20 @@ import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Basic Server Statistics
+ * zk服务器运行时统计器
  */
 public class ServerStats {
     private static final Logger LOG = LoggerFactory.getLogger(ServerStats.class);
 
+    //zk启动开始，或者是最近一次重置服务器统计信息后，服务端向客户端发送的响应包次数
     private long packetsSent;
+    //zk启动开始，或者是最近一次重置服务器统计信息后，服务端接收到的客户端请求包次数
     private long packetsReceived;
-    private long maxLatency;
-    private long minLatency = Long.MAX_VALUE;
-    private long totalLatency = 0;
-    private long count = 0;
+    //zk启动开始，或者是最近一次重置服务器统计信息后，服务端请求处理的
+    private long maxLatency;//最大延时
+    private long minLatency = Long.MAX_VALUE;//最小延时
+    private long totalLatency = 0;//总延时
+    private long count = 0;//客户端请求总次数
     private AtomicLong fsyncThresholdExceedCount = new AtomicLong(0);
 
     private final BufferStats clientResponseStats = new BufferStats();

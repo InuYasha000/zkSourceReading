@@ -42,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class ServerCnxnFactory {
 
+    //可以通过这个配置来指定zk服务端网络连接工厂是NIO还是netty框架 zookeeper.serverCnxnFactory
     public static final String ZOOKEEPER_SERVER_CNXN_FACTORY = "zookeeper.serverCnxnFactory";
     
     private static final Logger LOG = LoggerFactory.getLogger(ServerCnxnFactory.class);

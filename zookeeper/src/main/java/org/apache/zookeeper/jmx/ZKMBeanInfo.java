@@ -31,6 +31,8 @@ public interface ZKMBeanInfo {
      * If isHidden returns true, the MBean won't be registered with MBean server,
      * and thus won't be available for management tools. Used for grouping MBeans.
      * @return true if the MBean is hidden.
+     * 返回true标识这个MBean不会注册在MBean server上，所以也就不会有注销
+     * 目前zk所有MBean实现都返回false
      */
     public boolean isHidden();
 }

@@ -21,6 +21,9 @@ package org.apache.zookeeper.server.quorum;
 
 import org.apache.zookeeper.server.quorum.Vote;
 
+/**
+ * 选举算法，只有FastLeaderElection了
+ */
 public interface Election {
     public Vote lookForLeader() throws InterruptedException;
     public void shutdown();

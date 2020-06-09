@@ -59,6 +59,7 @@ public class ManagedUtil {
      * "zookeeper.jmx.log4j.disable" to true to disable registration.
      * @see http://logging.apache.org/log4j/1.2/apidocs/index.html?org/apache/log4j/jmx/package-summary.html
      * @throws JMException if registration fails
+     * 通过jmx管理log4j
      */
     @SuppressWarnings("rawtypes")
     public static void registerLog4jMBeans() throws JMException {

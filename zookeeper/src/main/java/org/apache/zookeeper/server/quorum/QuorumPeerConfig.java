@@ -75,8 +75,8 @@ public class QuorumPeerConfig {
     protected boolean sslQuorum = false;
     protected boolean shouldUsePortUnification = false;
     protected boolean sslQuorumReloadCertFiles = false;
-    protected File dataDir;
-    protected File dataLogDir;
+    protected File dataDir;//zk数据储存位置
+    protected File dataLogDir;//zk事务日志储存位置
     protected String dynamicConfigFileStr = null;
     //zookeeper/src/main/resource/zoo.cfg
     protected String configFileStr = null;
@@ -98,8 +98,8 @@ public class QuorumPeerConfig {
     protected long serverId = UNSET_SERVERID;
 
     protected QuorumVerifier quorumVerifier = null, lastSeenQuorumVerifier = null;
-    protected int snapRetainCount = 3;
-    protected int purgeInterval = 0;
+    protected int snapRetainCount = 3;//一次清理最少快照和事务日志数
+    protected int purgeInterval = 0;//定时时间
     protected boolean syncEnabled = true;
 
     protected LearnerType peerType = LearnerType.PARTICIPANT;

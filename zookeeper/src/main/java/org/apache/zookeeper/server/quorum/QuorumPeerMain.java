@@ -61,7 +61,9 @@ import org.apache.zookeeper.server.quorum.QuorumPeerConfig.ConfigException;
  * </ol>
  * In addition to the config file. There is a file in the data directory called
  * "myid" that contains the server id as an ASCII decimal value.
+ * 数据目录中有一个名为“myid”，将serverId作为ASCII十进制值
  *
+ * main（）方法启动程序时，第一个参数是配置文件的路径，用于获取配置信息。
  */
 @InterfaceAudience.Public
 public class QuorumPeerMain {
@@ -109,27 +111,27 @@ public class QuorumPeerMain {
     protected void initializeAndRun(String[] args)
         throws ConfigException, IOException, AdminServerException
     {
-        //--读取配置信息
+        //读取配置信息.解析zoo.cfg
         QuorumPeerConfig config = new QuorumPeerConfig();
         if (args.length == 1) {
             config.parse(args[0]);
         }
 
         // Start and schedule the the purge task
-        //1--启动并创建历史文件清理器，包括对事务日志和快照数据文件进行定时清理
+        //启动并创建历史文件清理器，包括对事务日志和快照数据文件进行定时清理
         DatadirCleanupManager purgeMgr = new DatadirCleanupManager(config
                 .getDataDir(), config.getDataLogDir(), config
                 .getSnapRetainCount(), config.getPurgeInterval());
         purgeMgr.start();
 
         if (args.length == 1 && config.isDistributed()) {
-            //1--集群模式
+            //集群模式
             runFromConfig(config);
         } else {
             LOG.warn("Either no config or no quorum defined in config, running "
                     + " in standalone mode");
             // there is only server in the quorum -- run as standalone
-            //1--单机模式
+            //单机模式
             ZooKeeperServerMain.main(args);
         }
     }
@@ -148,13 +150,13 @@ public class QuorumPeerMain {
           ServerCnxnFactory cnxnFactory = null;
           ServerCnxnFactory secureCnxnFactory = null;
 
+          //创建初始化ServerCnxnFactory
           if (config.getClientPortAddress() != null) {
               cnxnFactory = ServerCnxnFactory.createFactory();
               cnxnFactory.configure(config.getClientPortAddress(),
                       config.getMaxClientCnxns(),
                       false);
           }
-
           if (config.getSecureClientPortAddress() != null) {
               secureCnxnFactory = ServerCnxnFactory.createFactory();
               secureCnxnFactory.configure(config.getSecureClientPortAddress(),
@@ -162,7 +164,9 @@ public class QuorumPeerMain {
                       true);
           }
 
+          //创建QuorumPeer
           quorumPeer = getQuorumPeer();
+          //创建FileTxnSnapLog
           quorumPeer.setTxnFactory(new FileTxnSnapLog(
                       config.getDataLogDir(),
                       config.getDataDir()));
@@ -171,6 +175,7 @@ public class QuorumPeerMain {
               config.isLocalSessionsUpgradingEnabled());
           //quorumPeer.setQuorumPeers(config.getAllMembers());
           quorumPeer.setElectionType(config.getElectionAlg());
+          //设置myId
           quorumPeer.setMyid(config.getServerId());
           quorumPeer.setTickTime(config.getTickTime());
           quorumPeer.setMinSessionTimeout(config.getMinSessionTimeout());
@@ -178,6 +183,7 @@ public class QuorumPeerMain {
           quorumPeer.setInitLimit(config.getInitLimit());
           quorumPeer.setSyncLimit(config.getSyncLimit());
           quorumPeer.setConfigFileName(config.getConfigFilename());
+          //创建zkdatabase
           quorumPeer.setZKDatabase(new ZKDatabase(quorumPeer.getTxnFactory()));
           quorumPeer.setQuorumVerifier(config.getQuorumVerifier(), false);
           if (config.getLastSeenQuorumVerifier()!=null) {
@@ -207,7 +213,6 @@ public class QuorumPeerMain {
           quorumPeer.setQuorumCnxnThreadsSize(config.quorumCnxnThreadsSize);
           quorumPeer.initialize();
 
-          //开始选举
           quorumPeer.start();
           quorumPeer.join();
       } catch (InterruptedException e) {
