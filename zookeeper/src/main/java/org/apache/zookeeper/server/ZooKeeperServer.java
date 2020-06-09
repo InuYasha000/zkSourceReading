@@ -849,6 +849,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         }
     }
 
+    //获取”zookeeper.snapCount“配置的快照数
     public static int getSnapCount() {
         String sc = System.getProperty("zookeeper.snapCount");
         try {

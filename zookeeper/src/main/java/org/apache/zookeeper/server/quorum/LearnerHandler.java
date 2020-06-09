@@ -58,6 +58,7 @@ import org.slf4j.LoggerFactory;
  * learner. All communication with a learner is handled by this
  * class.
  * 一个LearnerHandler对应一个Leader和Learner服务器之间的连接，负责两者之间的所有的消息通信和同步
+ * 在leader服务器中是一个HashSet<LearnerHandler> learners结构
  */
 public class LearnerHandler extends ZooKeeperThread {
     private static final Logger LOG = LoggerFactory.getLogger(LearnerHandler.class);

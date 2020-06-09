@@ -34,6 +34,9 @@ import org.apache.zookeeper.txn.SetDataTxn;
 import org.apache.zookeeper.txn.TxnHeader;
 /**
  * This class has the control logic for the Follower.
+ * 处理客户端非事务请求，转发事务请求给Leader服务器
+ * 参与事务请求Proposal的投票
+ * 参与Leader选举投票
  */
 public class Follower extends Learner{
 

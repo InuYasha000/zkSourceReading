@@ -34,7 +34,7 @@ import org.apache.zookeeper.server.persistence.FileTxnSnapLog;
  * we anticipate specializing the request processors in the future. 
  *
  */
-//7--只提供非事务能力
+//7--只提供非事务能力，不参与任何形式的投票
 public class ObserverZooKeeperServer extends LearnerZooKeeperServer {
     private static final Logger LOG =
         LoggerFactory.getLogger(ObserverZooKeeperServer.class);        

@@ -70,6 +70,7 @@ public class SyncRequestProcessor extends ZooKeeperCriticalThread implements
     private final Random r = new Random();
     /**
      * The number of log entries to log before starting a snapshot
+     * 快照记录的日志条数,通过"zookeeper.snapCount"配置，并且最小值是2
      */
     private static int snapCount = ZooKeeperServer.getSnapCount();
 

@@ -87,10 +87,11 @@ import java.util.concurrent.LinkedBlockingQueue;
  * state of the system. It counts on ZooKeeperServer to update
  * outstandingRequests, so that it can take into account transactions that are
  * in the queue to be applied when generating a transaction.
+ * 在zk中，将那些改变服务器状态的请求称为事务请求，通常指创建节点，更新数据，删除节点，以及创建会话等请求，
  */
 //7--将写操作记录在ZookeeperServer的outstandingChanges队列中，
 //7--outstandingChanges主要用于FinalRequestProcessor的processorRequest方法中，用来确保FinalRequestProcessor是按照outstandingChanges的顺序来执行Request
-//7--识别出当前客户端是否是事务请求，PrepRequestProcessor会对事务请求进行一系列处理，比如创建请求事务头，会话检查，acl检查和版本检查
+//7--PrepRequestProcessor识别出当前客户端是否是事务请求，会对事务请求进行一系列处理，比如创建请求事务头，会话检查，acl检查和版本检查
 public class PrepRequestProcessor extends ZooKeeperCriticalThread implements
         RequestProcessor {
     private static final Logger LOG = LoggerFactory.getLogger(PrepRequestProcessor.class);

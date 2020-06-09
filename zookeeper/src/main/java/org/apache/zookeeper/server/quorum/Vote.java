@@ -84,11 +84,11 @@ public class Vote {
     }
 
     final private int version;
-    //被选举leader的服务器ID(myid)
+    //被选举leader的sid(myid)
     final private long id;
     //被选举leader的事务ID
     final private long zxid;
-    //逻辑时钟，判断多个选票是否处于同一个选举周期，
+    //逻辑时钟，判断多个选票是否处于同一个选举周期，每次进入新的选举周期，都会对这个值+1
     final private long electionEpoch;
     //被推举leader的选举轮次
     final private long peerEpoch;

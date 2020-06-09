@@ -29,6 +29,7 @@ import org.apache.zookeeper.server.Request;
 import org.apache.zookeeper.server.RequestProcessor;
 
 //7--Follower持久化写事务到磁盘后，立即调用SendAckRequestProcessor的processRequest方法给leader发送ack消息，等待leader的commit消息
+//leader也有这个，不过是本地消息
 public class SendAckRequestProcessor implements RequestProcessor, Flushable {
     private static final Logger LOG = LoggerFactory.getLogger(SendAckRequestProcessor.class);
 

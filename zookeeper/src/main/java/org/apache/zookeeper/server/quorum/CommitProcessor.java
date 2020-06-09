@@ -66,7 +66,7 @@ import org.apache.zookeeper.server.ZooKeeperServerListener;
  * read requests to be processed in parallel with write requests.
  */
 //--给Leader发送的Proposal进行确认，确保多条写事务按照顺序执行，前一条写事务执行完毕才能执行下一条(zxid顺序)
-//处理的是需要女确认的写事务请求，读操作会直接忽略掉，nextProcessor->FinalRequestProcessor
+//处理的是需要确认的写事务请求，读操作会直接忽略掉，nextProcessor->FinalRequestProcessor
 //7--这是一个线程
 //7--事务提交处理器，非事务请求，交给下一级
 public class CommitProcessor extends ZooKeeperCriticalThread implements

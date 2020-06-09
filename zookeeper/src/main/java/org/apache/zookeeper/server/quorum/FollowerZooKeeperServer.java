@@ -39,6 +39,7 @@ import org.apache.zookeeper.txn.TxnHeader;
  * FinalRequestProcessor
  *
  * A SyncRequestProcessor is also spawned off to log proposals from the leader.
+ * FollowerRequestProcessor:判断当前请求是否是事务请求，是的话转发
  */
 public class FollowerZooKeeperServer extends LearnerZooKeeperServer {
     private static final Logger LOG =

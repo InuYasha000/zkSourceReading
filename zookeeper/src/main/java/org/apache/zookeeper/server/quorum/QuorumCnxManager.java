@@ -65,9 +65,13 @@ import org.slf4j.LoggerFactory;
  * guarantee that there is exactly one connection for every pair of servers that
  * are operating correctly and that can communicate over the network.
  *
+ * 这个类使用TCP实现一个领导者选举的连接管理器
+ * 最重要的一点是保证对于每个server都对应一个连接
  * If two servers try to start a connection concurrently, then the connection
  * manager uses a very simple tie-breaking mechanism to decide which connection
  * to drop based on the IP addressed of the two parties.
+ *
+ * 如果两个服务器尝试同时启动连接，则连接管理器使用一个非常简单的断开连接机制根据双方的IP地址(sid)来决定删除哪个连接，sid大的建立连接
  *
  * For every peer, the manager maintains a queue of messages to send. If the
  * connection to any particular peer drops, then the sender thread puts the
@@ -77,6 +81,8 @@ import org.slf4j.LoggerFactory;
  * Although this is not a problem for the leader election, it could be a problem
  * when consolidating peer communication. This is to be verified, though.
  *
+ * 它维护一个要发送的消息队列，如果某个连接挂了，那么发送线程会把消息放回到队列尾部，这有可能打乱了原有的消息顺序，
+ * 但是这对于leader选举来说并没有太大影响，有可能在peer通信之间形成影响(未被验证)
  */
 
 //选举信息交换的Socket框架，采用Netty框架负责底层Socket链接管理，提供Select在多个Socket之间切换，先到先得处理选举交换
@@ -139,19 +145,19 @@ public class QuorumCnxManager {
     /*
      * Mapping from Peer to Thread number
      */
-    //5--发送器集合。每个SenderWorker消息发送器，都对应一台远程ZooKeeper服务器，负责消息的发送，在这个集合中，key
+    //5--发送器集合。每个SenderWorker消息发送器，都对应一台远程ZooKeeper服务器，负责消息的发送，在这个集合中，key也是sid
     final ConcurrentHashMap<Long, SendWorker> senderWorkerMap;
-    //5--发送队列，每个机器占据一条记录，key=sid(quorumpeer的地址),网络发送的队列
+    //5--发送队列，每个机器占据一个单独队列，保证各台机器消息发送各不影响，key=sid(quorumpeer的地址),网络发送的队列
     //5--SendWorker线程发送
     final ConcurrentHashMap<Long, ArrayBlockingQueue<ByteBuffer>> queueSendMap;
-    //5--最近发送过的消息。在这个集合中，为每个SID保留最近发送过的一个消息
+    //5--最近发送过的消息。在这个集合中，为每个SID保留最近发送过的一个消息，key也是sid
     final ConcurrentHashMap<Long, ByteBuffer> lastMessageSent;
 
     /*
      * Reception queue
      */
     //5--接受队列，不同机器消息全部放在这个队列中，网络接受消息的队列
-    //5--RecvWorker接收线程放入
+    //5--RecvWorker接收线程放入，详见addToRecvQueue()
     public final ArrayBlockingQueue<Message> recvQueue;
     /*
      * Object to synchronize access to recvQueue
@@ -171,6 +177,7 @@ public class QuorumCnxManager {
 
     /*
      * Counter to count worker threads
+     * RecvWorker和SendWorker的数量
      */
     private AtomicInteger threadCnt = new AtomicInteger(0);
 
@@ -475,6 +482,7 @@ public class QuorumCnxManager {
      * connection if it wins. Notice that it checks whether it has a connection
      * to this server already or not. If it does, then it sends the smallest
      * possible long value to lose the challenge.
+     * 当有新的连接到来时，会根据sid大小来判断是否建立新的连接，详见handleConnection()
      *
      */
     public void receiveConnection(final Socket sock) {
@@ -1065,6 +1073,7 @@ public class QuorumCnxManager {
         synchronized boolean finish() {
             LOG.debug("Calling finish for " + sid);
 
+            //防止重复关闭
             if(!running){
                 /*
                  * Avoids running finish() twice.
@@ -1115,6 +1124,10 @@ public class QuorumCnxManager {
                  * (and exit the thread) prior to reading/processing
                  * the last message. Duplicate messages are handled correctly
                  * by the peer.
+                 *
+                 * SendWorker将消息发送后会把消息放入{@link lastMessageSent}中，这么处理的原因在于
+                 * 接收方在消息接收前或者消息接受后宕机导致消息未被正确处理。所以这里重复发送。
+                 * 同时zk接收方也对重复消息做了处理
                  *
                  * If the send queue is non-empty, then we have a recent
                  * message than that stored in lastMessage. To avoid sending
@@ -1242,6 +1255,9 @@ public class QuorumCnxManager {
                     din.readFully(msgArray, 0, length);
                     ByteBuffer message = ByteBuffer.wrap(msgArray);
                     //--添加到recvQueue队列
+                    /**
+                     * {@link recvQueue}
+                     */
                     //--删除队列头部消息(如果内存空间不够)，添加到队尾
                     addToRecvQueue(new Message(message.duplicate(), sid));
                 }
@@ -1333,10 +1349,15 @@ public class QuorumCnxManager {
      * from polling the queue since that synchronization is provided by the
      * queue itself.
      *
+     * 插入分为三步
+     * 1：检查队列是否已满
+     * 2：已满，删除头部
+     * 3：插入尾部
+     * 同步处理上述三个步骤，不然有可能一个线程删除了头部成功，但是被另一个线程成功插入，导致该线程插入失败(因为删除的点又被插入了)
      * @param msg
      *          Reference to the message to be inserted in the queue
      */
-    //5--删除头部，保留尾部
+    //5--如果recvQueue满了，删除头部，保留尾部
     public void addToRecvQueue(Message msg) {
         synchronized(recvQLock) {
             if (recvQueue.remainingCapacity() == 0) {

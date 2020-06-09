@@ -273,26 +273,28 @@ public class Leader {
     /**
      * This message is for follower to expect diff
      */
-    final static int DIFF = 13;
+    final static int DIFF = 13;//Leader-Learner,通知Learner，Leader即将与其进行增量方式的数据同步
 
     /**
      * This is for follower to truncate its logs
      */
-    final static int TRUNC = 14;
+    final static int TRUNC = 14;//Leader-Learner,触发Learner服务端的内存数据库回滚
 
     /**
      * This is for follower to download the snapshots
      */
-    final static int SNAP = 15;
+    final static int SNAP = 15;//Leader-Learner,通知Learner，Leader即将与其进行全量方式的数据同步
 
     /**
      * This tells the leader that the connecting peer is actually an observer
      */
-    final static int OBSERVERINFO = 16;
+    final static int OBSERVERINFO = 16;//Observer->Leader ，Observer服务器启动时发送给Leader，向Leader注册自己，同时表明自己身份是Observer，消息包含当前Observer服务器的SID和最新的ZXID
 
     /**
      * This message type is sent by the leader to indicate it's zxid and if
      * needed, its database.
+     * Leader->Learner,该消息通常用于Leader服务器向Learner发送一个阶段性的标识消息--Leader会在和Learner完成一个交互流程后
+     * 向Learner发送NEWLEADER消息，同时带上当前Leader最新ZXID，这些交互流程包括：足够多的Follower连接上Leader或是完成数据同步
      */
     final static int NEWLEADER = 10;
 
@@ -300,66 +302,80 @@ public class Leader {
      * This message type is sent by a follower to pass the last zxid. This is here
      * for backward compatibility purposes.
      */
-    final static int FOLLOWERINFO = 11;
+    final static int FOLLOWERINFO = 11;//Follower->Leader ，Follower服务器启动时发送给Leader，向Leader注册自己，同时表明自己身份是Follower，消息包含当前Follower服务器的SID和最新的ZXID
 
     /**
      * This message type is sent by the leader to indicate that the follower is
      * now uptodate andt can start responding to clients.
      */
-    final static int UPTODATE = 12;
+    final static int UPTODATE = 12;//Leader-Learner,告诉Learner已经完成了数据同步，可以开始对外提供服务了
 
     /**
      * This message is the first that a follower receives from the leader.
      * It has the protocol version and the epoch of the leader.
+     * Leader->Learner ，Learner连接上Leader后，会发送FOLLOWERINFO和OBSERVERINFO两类消息，Leader接收到后
+     * 也会将Leader服务器的基本信息发给当前Learner，这个消息就是LEADERINFO，包含当前Leader的最新EPOCH值
      */
     public static final int LEADERINFO = 17;
 
     /**
      * This message is used by the follow to ack a proposed epoch.
+     * Learner->Leader，Learner在接收到Leader发来的LEADERINFO消息后，会将自己最新的ZXID和EPOCH以ACKEPOCH发给Leader
      */
     public static final int ACKEPOCH = 18;
 
     /**
      * This message type is sent to a leader to request and mutation operation.
      * The payload will consist of a request header followed by a request.
+     * Learner->Leader zk的请求转发消息，所有事务请求都必须由Leader服务器来处理，因此Learner会将事务请求以REQUEST形式转发给Leader服务器
      */
     final static int REQUEST = 1;
 
     /**
      * This message type is sent by a leader to propose a mutation.
+     * Leader->Follower zk实现ZAB算法核心，也就是ZAB协议中的提议，处理事务请求时，Leader服务器会将事务请求以PROPOSAL消息形式创建投票发给集群中所有Follower服务器来进行事务日志的记录
      */
     public final static int PROPOSAL = 2;
 
     /**
      * This message type is sent by a follower after it has synced a proposal.
+     * Follower->Leader Follower接收到来自Leader的Proposal消息后，进行事务日志记录，如果完成了事务日志的记录，那么就会以ACK消息的形式反馈给Leader
      */
     final static int ACK = 3;
 
     /**
      * This message type is sent by a leader to commit a proposal and cause
      * followers to start serving the corresponding data.
+     * Leader->Follower 通知集群中所有Follower，可以进行事务提交，Leader在收到过半的Follower发来的ACK消息后，进入事务请求的最终流程，生成COMMIT消息，通知所有Follower进行事务请求提交
      */
     final static int COMMIT = 4;
 
     /**
      * This message type is enchanged between follower and leader (initiated by
      * follower) to determine liveliness.
+     * Leader->Learner 用于Leader同步Learner上的客户端的心跳检查，用以激活存活的客户端，zk客户端会随机和任意一个zk服务器保持连接，
+     * 因为Leader无法直接收到所有客户端的心跳检查，需要委托给Learner来保存这些所有客户端的心跳检查记录，Leader会定时向Learner发送Ping消息，
+     * Learner接收到Ping消息后，会将这段时间内保持心跳检查的客户端列表同样以Ping消息形式反馈给Leader服务器，由Leader服务器来负责逐个对这些客户端进行会话激活
      */
     final static int PING = 5;
 
     /**
      * This message type is to validate a session that should be active.
+     * Learner->Leader 该消息用于Learner校验会话是否有效，同时也会激活会话，通常在客户端重新链接的过程中，新的服务器需要向Leader发送REVALIDATE消息以确定该会话是否超时
      */
     final static int REVALIDATE = 6;
 
     /**
      * This message is a reply to a synchronize command flushing the pipe
      * between the leader and the follower.
+     * Leader->Learner 通知Learner服务器完成了Sync操作
      */
     final static int SYNC = 7;
 
     /**
      * This message type informs observers of a committed proposal.
+     * Leader->Observer,事务提交阶段，leader只需要一个COMMIT消息即可让Follower完成事务提交，因为在这之前，follower已经接收过Proposal，该Proposal缓存了事务请求内容
+     * 对于Observer来说，之前是没有Proposal消息的，因此Leader发送COMMIT消息是没办法完成事务提交的，所以INFORM消息就是解决Observer消息提交问题，同时在消息中携带了事务请求内容
      */
     final static int INFORM = 8;
     
@@ -933,7 +949,8 @@ public class Leader {
         }
     }
 
-    //7--维护ToBeApplied列表，然后每次将列表中一条记录发给FinalrequestProcessor,同时删除，
+    //7--维护ToBeApplied列表，储存那些已经被CommitProcessor处理过的可被提交到FinalrequestProcessor的proposal
+    // 然后每次将列表中一条记录发给FinalrequestProcessor,同时删除，
     static class ToBeAppliedRequestProcessor implements RequestProcessor {
         private final RequestProcessor next;
 

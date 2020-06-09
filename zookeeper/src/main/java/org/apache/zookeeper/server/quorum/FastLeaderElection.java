@@ -44,33 +44,31 @@ import org.slf4j.LoggerFactory;
  * Implementation of leader election using TCP. It uses an object of the class
  * QuorumCnxManager to manage connections. Otherwise, the algorithm is push-based
  * as with the other UDP implementations.
+ * QuorumCnxManager利用TCP实现leader选举。FastLeaderElection使用QuorumCnxManager管理连接。另外该算法是和其他UDP一样基于推送实现
  *
  * There are a few parameters that can be tuned to change its behavior. First,
  * finalizeWait determines the amount of time to wait until deciding upon a leader.
  * This is part of the leader election algorithm.
+ * {@link finalizeWait}代表在决定了leader后还会再次等待是否有更优的leader的一个时间量
+ *
+ * 每一个FastLeaderElection变量维护了一个内置类{@link Messenger}，两个变量{@link sendqueue}，{@link recvqueue}
+ * Messenger类包含了两个实现了Runnable接口的类{@link Messenger.WorkerReceiver}和{@link Messenger.WorkerSender}
+ * WorkerReceiver负责接收消息并将接收到的消息放入{@link recvqueue}中等待处理
+ * WorkerSender负责从{@link sendqueue}中取出待发送消息，交给下层的连接管理类QuorumCnxManager进行发送
+ *
+ * FastLeaderElection的WorkerSender从FastLeaderElection的sendqueue.poll，放入QuorumManager的queueMapSend发送队列，最后由QuorumManager的senderWorkerMap发送线程SendWork发送
+ * FastLeaderElection的WorkerReceiver从QuorumManager的recvQueue.poll(QuorumManager的RecvWorker消息接收线程放入的)在放进FastLeaderElection的recvqueue
+ *
+ * 每一个QuorumPeer对象维护了一个FastLeaderElection对象来为自己的选举工作进行代言
  */
-
-//5--每一个FastLeaderElection变量维护了一个内置类Messager
-
-//5--Messager类包含了两个实现了Runnable接口的类WorkerReceiver和WorkerSender
-//5--这两个类分别负责消息的发送和接收。即WorkerReceiver负责接收消息并将接收到的消息放入recvqueue中等待处理，
-// WorkerSender负责从sendqueue中取出待发送消息，交给下层的连接管理类QuorumCnxManager进行发送
-
-//5--FastLeaderElection的WorkerSender从FastLeaderElection的sendqueue.poll，放入QuorumManager的queueMapSend发送队列，最后由QuorumManager的senderWorkerMap发送线程SendWork发送
-//5--FastLeaderElection的WorkerReceiver从QuorumManager的recvQueue.poll(QuorumManager的RecvWorker消息接收线程放入的)在放进FastLeaderElection的recvqueue，
-
-//5--每一个QuorumPeer对象维护了一个FastLeaderElection对象来为自己的选举工作进行代言
-//5--FastLeaderElection中维护了两个变量:sendqueue,recvqueue
-
-//5--recvqueue中存放了选举过程中接收到的消息，这些消息被交给了FastLeaderElection的最核心方法lookForLeader()进行处理以选举出leader。
-// 而sendqueue中存放了待发送出去的消息。
-public class   FastLeaderElection implements Election {
+public class FastLeaderElection implements Election {
     private static final Logger LOG = LoggerFactory.getLogger(FastLeaderElection.class);
 
     /**
      * Determine how much time a process has to wait
      * once it believes that it has reached the end of
      * leader election.
+     * 在选出leader后继续等待一段时间看是否有更好的leader
      */
     final static int finalizeWait = 200;
 
@@ -88,6 +86,7 @@ public class   FastLeaderElection implements Election {
      * Connection manager. Fast leader election uses TCP for
      * communication between peers, and QuorumCnxManager manages
      * such connections.
+     * QuorumCnxManager利用TCP实现leader选举
      */
 
     QuorumCnxManager manager;
@@ -98,6 +97,8 @@ public class   FastLeaderElection implements Election {
      * a given peer has changed its vote, either because it has
      * joined leader election or because it learned of another
      * peer with higher zxid or same zxid and higher server id
+     * 通知别的服务器它已经改变了它的选举结果的这样的一个雷
+     * 刚加入选举(作为服务器加入集群)或者发现了具有更高zid或者sid的server(更好的leader选择)
      */
 
     static public class Notification {
@@ -217,9 +218,7 @@ public class   FastLeaderElection implements Election {
         long peerEpoch;
     }
 
-    //--用于发送给给发送消息队列(QueueSendMap)的消息发送队列
-    //这两个消息结构体差不多
-    //ToSend
+    //Tosend
     LinkedBlockingQueue<ToSend> sendqueue;
     //Notification
     //--从QuoruoCxnManage获取网络接收到的message包，组成Notification消息，放入recvqueue队列,-------不是网络接受的包，
@@ -238,24 +237,26 @@ public class   FastLeaderElection implements Election {
          * Receives messages from instance of QuorumCnxManager on
          * method run(), and processes such messages.
          */
-
+        /**
+         * 选票接收器 从QuorumCnxManager中获取其它服务器发来的消息，转换为选票保存到{@link recvqueue}
+         */
         class WorkerReceiver extends ZooKeeperThread  {
             volatile boolean stop;
-            QuorumCnxManager manager;
+            QuorumCnxManager manager;//初始化的值来自 FastLeaderElection fle = new FastLeaderElection(this, qcm);QuorumPeer#createElectionAlgorithm()
 
             WorkerReceiver(QuorumCnxManager manager) {
                 super("WorkerReceiver");
                 this.stop = false;
                 this.manager = manager;
             }
-            //5--FastLeaderElection的WorkerReceive线程将来自QuorumCnxManager中recvQueue队列的消息组装成Notification放入FastLeaderElection的recvqueue队列
+            //5--FastLeaderElection的WorkerReceive线程将来自 QuorumCnxManager中recvQueue队列 的消息组装成Notification放入FastLeaderElection的recvqueue队列
             public void run() {
 
                 Message response;
                 while (!stop) {
                     // Sleeps on receive
                     try {
-                        //5--QuorumCnxManager中recvQueue队列的消息
+                        //5-- QuorumCnxManager中recvQueue队列的消息
                         response = manager.pollRecvQueue(3000, TimeUnit.MILLISECONDS);
                         if(response == null) continue;
 
@@ -702,6 +703,7 @@ public class   FastLeaderElection implements Election {
 
     /**
      * Send notifications to all peers upon a change in our vote
+     * 初始化投票并放入{@link sendqueue},由发送器WorkerSender#run()
      */
     private void sendNotifications() {
         for (long sid : self.getCurrentAndNextConfigVoters()) {
@@ -928,7 +930,8 @@ public class   FastLeaderElection implements Election {
            self.start_fle = Time.currentElapsedTime();
         }
         try {
-            //--储存收到的Notication,这个用来做选举里面的大多数判断
+            //记录收到的选举信息（LOOKING和LEADING状态的，FOLLOWING和OBSERVING不会记录）
+            //记录这个是为了有一个大多数服务器都同意leader的判断，也就是termPredicate()方法
             HashMap<Long, Vote> recvset = new HashMap<Long, Vote>();
 
             HashMap<Long, Vote> outofelection = new HashMap<Long, Vote>();
@@ -960,6 +963,7 @@ public class   FastLeaderElection implements Election {
                  */
                 //5--recvqueue数据来自Messenger，也可能来自后面候选人失败了再放进去的消息
                 //5--notTimeout超时时间
+                //接收外部投票，
                 Notification n = recvqueue.poll(notTimeout,
                         TimeUnit.MILLISECONDS);
 
@@ -967,6 +971,8 @@ public class   FastLeaderElection implements Election {
                  * Sends more notifications if haven't received enough.
                  * Otherwise processes new notification.
                  */
+                //如果发现无法获得外部投票，检查自己和集群中其它服务器是否连接正常，
+                //没有链接则建立连接，有链接则再次发送
                 if(n == null){
                     //5--检查网络发送队列queueSendMap是否为空，再次发送
                     if(manager.haveDelivered()){
@@ -985,8 +991,8 @@ public class   FastLeaderElection implements Election {
                     notTimeout = (tmpTimeOut < maxNotificationInterval?
                             tmpTimeOut : maxNotificationInterval);
                     LOG.info("Notification time out: " + notTimeout);
-                } //5--?????
-                else if (validVoter(n.sid) && validVoter(n.leader)) {
+                } //validVoter(sid)检查当前sid是不是参与投票服务器中一员
+                else if (validVoter(n.sid) && validVoter(n.leader)) {//这里就是开始处理外部投票
                     //5--这里去看对面是什么状态
                     /*
                      * Only proceed if the vote comes from a replica in the current or next
@@ -1000,6 +1006,7 @@ public class   FastLeaderElection implements Election {
                         // If notification > current, replace and send messages out
                         //5--对方投票周期大于自己的
                         if (n.electionEpoch > logicalclock.get()) {
+                            //更新自己的选票轮次
                             logicalclock.set(n.electionEpoch);
                             //5--投票集合清空
                             recvset.clear();
@@ -1041,7 +1048,6 @@ public class   FastLeaderElection implements Election {
                         //记录收到的选举信息
                         recvset.put(n.sid, new Vote(n.leader, n.zxid, n.electionEpoch, n.peerEpoch));
 
-                        //5--判断当前候选人proposedLeader，proposedZxid，proposedEpoch在选票中是否占了大多数？？？不清楚怎么判断的--
                         //--QuorumHierarchical.containsQuorum()或者QuorumMaj.containsQuorum()
                         //5--尝试通过现在已经收到的信息，判断是否已经足够确认最终的leader了，通过方法termPredicate() ，判断标准很简单：是否已经有超过半数的机
                         // 器所推举的leader为当前自己所推举的leader.如果是，保险起见，最多再等待finalizeWait（默认200ms）的时间进行最后的确认，如果发现有
@@ -1053,7 +1059,7 @@ public class   FastLeaderElection implements Election {
 
                             // Verify if there is any change in the proposed leader
                             //--看是否已选定的候选人被修改
-                            //--注意这里有个finalizeWait延时获取
+                            //--注意这里有个finalizeWait延时获取,看看是否还有更优的选择的leader
                             while((n = recvqueue.poll(finalizeWait,
                                     TimeUnit.MILLISECONDS)) != null){
                                 if(totalOrderPredicate(n.leader, n.zxid, n.peerEpoch,
@@ -1110,7 +1116,7 @@ public class   FastLeaderElection implements Election {
                          * Before joining an established ensemble, verify that
                          * a majority are following the same leader.
                          */
-                        //--不在一个时钟，说明自己挂了又起起来了，把被人的投票放到outofelection，
+                        //--不在一个时钟，说明自己挂了又起起来了，把投票放到outofelection，
                         //--对方的投票在outofelection占据大多数并且承认自己愿意做leader
                         outofelection.put(n.sid, new Vote(n.version, n.leader, 
                                 n.zxid, n.electionEpoch, n.peerEpoch, n.state));
@@ -1164,6 +1170,7 @@ public class   FastLeaderElection implements Election {
      * Check if a given sid is represented in either the current or
      * the next voting view
      *
+     * 检查当前sid是不是参与投票服务器中一员
      * @param sid     Server identifier
      * @return boolean
      */
