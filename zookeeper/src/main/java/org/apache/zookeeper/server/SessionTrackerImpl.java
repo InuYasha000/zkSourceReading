@@ -50,10 +50,13 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
     protected final ConcurrentHashMap<Long, SessionImpl> sessionsById =
         new ConcurrentHashMap<Long, SessionImpl>();
 
+    //时间排序的固定持续时间存储桶中跟踪元素,zk分桶策略
     private final ExpiryQueue<SessionImpl> sessionExpiryQueue;
 
     //根据sessionId管理会话超时时间，该数据结构和zk内存数据库相联通，会被定期持久化到快照文件中
+    //key:sessionId value:会话超时时间
     private final ConcurrentMap<Long, Integer> sessionsWithTimeout;
+    //sessionId逐个递增
     private final AtomicLong nextSessionId = new AtomicLong();
 
     public static class SessionImpl implements Session {
@@ -81,7 +84,7 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
     /**
      * Generates an initial sessionId. High order byte is serverId, next 5
      * 5 bytes are from timestamp, and low order 2 bytes are 0s.
-     * 生成初始sessionId。高8字节是serverId（也就是zk服务器的sid），低56字节来自时间戳
+     * 生成初始sessionId。高8字节是serverId（也就是zk服务器的sid），低56字节来自时间戳，基准sessionId，后期逐个递增
      */
     public static long initializeNextSession(long id) {
         long nextSid;
@@ -262,6 +265,11 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
         }
     }
 
+    /**
+     * 递增产生sessionId
+     * SessionTrackerImpl维护了{@link sessionsWithTimeout}和{@link sessionsById}
+     * 产生的sessionId也会维护到上面两个变量，其实还有一个变量{@link sessionExpiryQueue}
+     */
     public long createSession(int sessionTimeout) {
         long sessionId = nextSessionId.getAndIncrement();
         addSession(sessionId, sessionTimeout);

@@ -38,6 +38,15 @@ import org.apache.zookeeper.txn.TxnHeader;
 public class Request {
     public final static Request requestOfDeath = new Request(null, 0, 0, 0, null, null);
 
+    /**
+     *
+     * @param cnxn
+     * @param sessionId
+     * @param xid 客户端操作序列号
+     * @param type 事务请求类型
+     * @param bb
+     * @param authInfo
+     */
     public Request(ServerCnxn cnxn, long sessionId, int xid, int type, ByteBuffer bb, List<Id> authInfo) {
         this.cnxn = cnxn;
         this.sessionId = sessionId;

@@ -57,6 +57,7 @@ import org.slf4j.LoggerFactory;
  */
 //NIOServerCnxn继承了ServerCnxn抽象类，使用NIO来处理与客户端之间的通信，使用单线程处理。
 //NIOServerCnxn维护了服务器与客户端之间的Socket通道、用于存储传输内容的缓冲区、会话ID、ZooKeeper服务器等
+//负责接收来自客户端的所有请求，并将请求内容从底层I/O读取出来
 public class NIOServerCnxn extends ServerCnxn {
     private static final Logger LOG = LoggerFactory.getLogger(NIOServerCnxn.class);
     // ServerCnxn工厂
@@ -184,7 +185,7 @@ public class NIOServerCnxn extends ServerCnxn {
         if (incomingBuffer.remaining() == 0) { // have we read length bytes?
             packetReceived();
             incomingBuffer.flip();
-            if (!initialized) {
+            if (!initialized) {//确定是不是会话创建请求
                 readConnectRequest();
             } else {
                 readRequest();

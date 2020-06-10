@@ -467,6 +467,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 
     public synchronized void startup() {
         if (sessionTracker == null) {
+            //创建session管理器(sessionId生成)
             createSessionTracker();
         }
         startSessionTracker();
@@ -685,19 +686,24 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
                 && Arrays.equals(passwd, generatePasswd(sessionId));
     }
 
+    //生成sessionId（sessionId在基准之上逐个递增）
     long createSession(ServerCnxn cnxn, byte passwd[], int timeout) {
         if (passwd == null) {
             // Possible since it's just deserialized from a packet on the wire.
             passwd = new byte[0];
         }
+        //会话注册，会话激活
         long sessionId = sessionTracker.createSession(timeout);
+        //生成会话密码
         Random r = new Random(sessionId ^ superSecret);
         r.nextBytes(passwd);
         ByteBuffer to = ByteBuffer.allocate(4);
         to.putInt(timeout);
         cnxn.setSessionId(sessionId);
+        //构建请求事务头
         Request si = new Request(cnxn, sessionId, 0, OpCode.createSession, to, null);
         setLocalSessionFlag(si);
+        //交给请求处理链
         submitRequest(si);
         return sessionId;
     }
@@ -725,6 +731,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 
     public void reopenSession(ServerCnxn cnxn, long sessionId, byte[] passwd,
             int sessionTimeout) throws IOException {
+        //校验passwd
         if (checkPasswd(sessionId, passwd)) {
             revalidateSession(cnxn, sessionId, sessionTimeout);
         } else {
@@ -809,6 +816,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 
     //7--判断ZookeeperServer的处理包流程是否准备就绪，没有则等待1秒，看是否抛出异常，否则调用firstprocess
     //7--firstProcess根据zookeeperserver子类不同指向的也不同，Leader->LeaderRequestProcessor,Follower->FollowerRequestProcessor
+    //PrepRequestProcessor -> SyncRequestProcessor -> FinalRequestProcessor
     public void submitRequest(Request si) {
         if (firstProcessor == null) {
             synchronized (this) {
@@ -1013,8 +1021,10 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     }
 
     //7--处理请求连接，被NettyServerCnxn或者NioServerCnxn在网络连接请求时调用，都实现了ServerCnxn接口
+    //会话创建请求
     public void processConnectRequest(ServerCnxn cnxn, ByteBuffer incomingBuffer) throws IOException {
         BinaryInputArchive bia = BinaryInputArchive.getArchive(new ByteBufferInputStream(incomingBuffer));
+        //反序列化ConnectRequest
         ConnectRequest connReq = new ConnectRequest();
         connReq.deserialize(bia, "connect");
         if (LOG.isDebugEnabled()) {
@@ -1034,12 +1044,14 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
                     + cnxn.getRemoteSocketAddress()
                     + "; will be dropped if server is in r-o mode");
         }
+        //readOnly服务端只能接收来自readOnly型客户端的请求
         if (!readOnly && this instanceof ReadOnlyZooKeeperServer) {
             String msg = "Refusing session request for not-read-only client "
                 + cnxn.getRemoteSocketAddress();
             LOG.info(msg);
             throw new CloseRequestException(msg);
         }
+        //正常情况下，服务端ZIXD大于客户端，否则不接受会话创建请求
         if (connReq.getLastZxidSeen() > zkDb.dataTree.lastProcessedZxid) {
             String msg = "Refusing session request for client "
                 + cnxn.getRemoteSocketAddress()
@@ -1052,6 +1064,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             LOG.info(msg);
             throw new CloseRequestException(msg);
         }
+        //协商sessionTimeout，zk服务端根据自己的超时时间限制来确定最终的超时时间
         int sessionTimeout = connReq.getTimeOut();
         byte passwd[] = connReq.getPasswd();
         int minSessionTimeout = getMinSessionTimeout();
@@ -1067,7 +1080,9 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         // session is setup
         cnxn.disableRecv();
         long sessionId = connReq.getSessionId();
-        if (sessionId == 0) {
+        //根据是否包含sessionId判断客户端是在进行重新连接还是创建会话
+        if (sessionId == 0) {//创建会话
+            //生成sessionId
             long id = createSession(cnxn, passwd, sessionTimeout);
             LOG.debug("Client attempting to establish new session:" +
                             " session = 0x{}, zxid = 0x{}, timeout = {}, address = {}",
@@ -1075,7 +1090,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
                     Long.toHexString(connReq.getLastZxidSeen()),
                     connReq.getTimeOut(),
                     cnxn.getRemoteSocketAddress());
-        } else {
+        } else {//重连
             long clientSessionId = connReq.getSessionId();
             LOG.debug("Client attempting to renew session:" +
                             " session = 0x{}, zxid = 0x{}, timeout = {}, address = {}",
