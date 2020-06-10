@@ -119,9 +119,12 @@ public class FileTxnLog implements TxnLog, Closeable {
         fsyncWarningThresholdMS = fsyncWarningThreshold;
     }
 
+    //上一个Zxid
     long lastZxidSeen;
+    //字符输出流
     volatile BufferedOutputStream logStream = null;
     volatile OutputArchive oa;
+    //文件输出流
     volatile FileOutputStream fos = null;
 
     File logDir;
@@ -175,7 +178,7 @@ public class FileTxnLog implements TxnLog, Closeable {
      * rollover the current log file to a new one.
      * @throws IOException
      */
-    //10--日志滚动，关闭旧的日志，启动新的日志，
+    //切换日志，当前日志已满，关闭旧的日志，启动新的日志，
     public synchronized void rollLog() throws IOException {
         if (logStream != null) {
             this.logStream.flush();
@@ -203,7 +206,7 @@ public class FileTxnLog implements TxnLog, Closeable {
      * @param txn the transaction part of the entry
      * returns true iff something appended, otw false
      */
-    //10--将事务添加到日志文件尾部，日志没滚动前写到当前日志，日志回滚的话写到新的日志文件，新日志文件的名称是'log.'+当前zxid的值
+    //将事务添加到日志文件尾部，日志没滚动前写到当前日志，日志回滚的话写到新的日志文件，新日志文件的名称是'log.'+当前zxid的值
     public synchronized boolean append(TxnHeader hdr, Record txn)
         throws IOException
     {
@@ -226,6 +229,7 @@ public class FileTxnLog implements TxnLog, Closeable {
            fos = new FileOutputStream(logFileWrite);
            logStream=new BufferedOutputStream(fos);
            oa = BinaryOutputArchive.getArchive(logStream);
+           //事务日志文件头部信息，魔数Magic，事务日志格式版本version，dbid
            FileHeader fhdr = new FileHeader(TXNLOG_MAGIC,VERSION, dbId);
            fhdr.serialize(oa, "fileheader");
            // Make sure that the magic number is written before padding.
@@ -234,14 +238,18 @@ public class FileTxnLog implements TxnLog, Closeable {
            streamsToFlush.add(fos);
         }
         filePadding.padFile(fos.getChannel());
+        //序列化事务头和事务体
         byte[] buf = Util.marshallTxnEntry(hdr, txn);
         if (buf == null || buf.length == 0) {
             throw new IOException("Faulty serialization for header " +
                     "and txn");
         }
+        //使用Adler32算法计算checksum
         Checksum crc = makeChecksumAlgorithm();
         crc.update(buf, 0, buf.length);
         oa.writeLong(crc.getValue(), "txnEntryCRC");
+        //写入事务日志文件流，此时并未写到磁盘上
+        //详见commit()方法
         Util.writeTxnBytes(oa, buf);
 
         return true;
@@ -256,6 +264,7 @@ public class FileTxnLog implements TxnLog, Closeable {
      * @return
      */
     public static File[] getLogFiles(File[] logDirList,long snapshotZxid) {
+        //其实就是根据事务日志名排序(log.zxid)，根据zxid排序
         List<File> files = Util.sortDataDir(logDirList, LOG_FILE_PREFIX, true);
         long logZxid = 0;
         // Find the log file that starts before or at the same time as the
@@ -392,6 +401,7 @@ public class FileTxnLog implements TxnLog, Closeable {
 
     /**
      * truncate the current transaction logs
+     * 根据zxid截断事务日志
      * @param zxid the zxid to truncate the logs to
      * @return true if successful false if not
      */
@@ -542,13 +552,17 @@ public class FileTxnLog implements TxnLog, Closeable {
         long zxid;
         TxnHeader hdr;
         Record record;
-        File logFile;
+        File logFile;//记录当前的事务日志位置,
         InputArchive ia;
         static final String CRC_ERROR="CRC check failed";
 
         PositionInputStream inputStream=null;
         //stored files is the list of files greater than
         //the zxid we are looking for.
+        /**
+         * 这个储存了比某个zxid要大的事务文件列表，用于截断事务日志，同時也加进去了一个小于zxid的日志文件(目前来看是为了确认{@link logFile}的位置)
+         */
+
         private ArrayList<File> storedFiles;
 
         /**

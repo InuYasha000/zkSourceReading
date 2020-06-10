@@ -319,7 +319,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         takeSnapshot();
     }
 
-    //7--将zookeeper树结构写到磁盘，事务日志持久化支持
+    //将内存中所有节点数据DataTree和会话信息写到磁盘，事务日志持久化支持
     public void takeSnapshot(){
         try {
             txnLogFactory.save(zkDb.getDataTree(), zkDb.getSessionWithTimeOuts());

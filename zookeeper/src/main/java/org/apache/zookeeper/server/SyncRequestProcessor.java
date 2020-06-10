@@ -129,9 +129,12 @@ public class SyncRequestProcessor extends ZooKeeperCriticalThread implements
                     // track the number of records written to the log
                     if (zks.getZKDatabase().append(si)) {
                         logCount++;
+                        //是否进行数据快照，避免zk集群所有机器在同一时刻都进行快照，采取过半机制
+                        //snapCount = 10000,那么会在5000-10000次时随机进行快照，randRoll是1-snapCount/2的随机数
                         if (logCount > (snapCount / 2 + randRoll)) {
                             randRoll = r.nextInt(snapCount/2);
                             // roll the log
+                            //事务日志切换，当前事务日志已满，重新创建新事务日志
                             zks.getZKDatabase().rollLog();
                             // take a snapshot
                             if (snapInProcess != null && snapInProcess.isAlive()) {

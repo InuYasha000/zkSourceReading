@@ -25,9 +25,10 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 
+//文件不断追加写入可能导致磁盘seek，索引预分配64M大小
 public class FilePadding {
     private static final Logger LOG;
-    private static long preAllocSize = 65536 * 1024;
+    private static long preAllocSize = 65536 * 1024;//事务文件预分配64M，可以通过'zookeeper.preAllocSize'设置
     private static final ByteBuffer fill = ByteBuffer.allocateDirect(1);
 
     static {
@@ -85,6 +86,7 @@ public class FilePadding {
      * Calculates a new file size with padding. We only return a new size if
      * the current file position is sufficiently close (less than 4K) to end of
      * file and preAllocSize is > 0.
+     * 扩容，就是文件大小+preAllocSize
      *
      * @param position     the point in the file we have written to
      * @param fileSize     application keeps track of the current file size

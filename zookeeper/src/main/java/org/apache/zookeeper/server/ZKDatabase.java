@@ -524,6 +524,7 @@ public class ZKDatabase {
 
     /**
      * Truncate the ZKDatabase to the specified zxid
+     * 截断日志，非Leader机器上记录的事务ID(peerLaseZxid)比Leader要大，此时Learner收到Leader的TRUNC命令，删除所有大于等于peerLaseZxid的日志
      * @param zxid the zxid to truncate zk database to
      * @return true if the truncate is successful and false if not
      * @throws IOException

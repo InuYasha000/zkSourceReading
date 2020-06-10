@@ -212,6 +212,7 @@ public class FileSnap implements SnapShot {
 
     /**
      * serialize the datatree and session into the file snapshot
+     * 序列化
      * @param dt the datatree to be serialized
      * @param sessions the sessions to be serialized
      * @param snapShot the file to store snapshot into
@@ -223,11 +224,14 @@ public class FileSnap implements SnapShot {
                  CheckedOutputStream crcOut = new CheckedOutputStream(sessOS, new Adler32())) {
                 //CheckedOutputStream cout = new CheckedOutputStream()
                 OutputArchive oa = BinaryOutputArchive.getArchive(crcOut);
+                //文件头，跟事务日志一样,包含魔数，版本，dbid
                 FileHeader header = new FileHeader(SNAP_MAGIC, VERSION, dbId);
                 serialize(dt, sessions, oa, header);
+                //校验和
                 long val = crcOut.getChecksum().getValue();
                 oa.writeLong(val, "val");
                 oa.writeString("/", "path");
+                //写入快照
                 sessOS.flush();
             }
         } else {

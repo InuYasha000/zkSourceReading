@@ -88,7 +88,8 @@ public class Util {
 
     /**
      * Creates a snapshot file name.
-     * 
+     * 生成快照名 snapshot.zxid
+     *
      * @param zxid used as a suffix
      * @return file name
      */
@@ -139,6 +140,8 @@ public class Util {
         String nameParts[] = name.split("\\.");
         if (nameParts.length == 2 && nameParts[0].equals(prefix)) {
             try {
+                //输出nameParts[1]在16进制下的zxid
+                //log.zxid（这是事务日志的格式名）
                 zxid = Long.parseLong(nameParts[1], 16);
             } catch (NumberFormatException e) {
             }
@@ -219,7 +222,8 @@ public class Util {
 
     /**
      * Serializes transaction header and transaction data into a byte buffer.
-     *  
+     * 序列化事务头和事务体
+     *
      * @param hdr transaction header
      * @param txn transaction data
      * @return serialized transaction record

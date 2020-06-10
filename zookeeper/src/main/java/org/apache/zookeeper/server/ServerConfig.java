@@ -40,8 +40,8 @@ public class ServerConfig {
     ////
     protected InetSocketAddress clientPortAddress;
     protected InetSocketAddress secureClientPortAddress;
-    protected File dataDir;
-    protected File dataLogDir;
+    protected File dataDir;//事务日志文件
+    protected File dataLogDir;//文件储存目录
     protected int tickTime = ZooKeeperServer.DEFAULT_TICK_TIME;
     protected int maxClientCnxns;
     /** defaults to -1 if not set explicitly */

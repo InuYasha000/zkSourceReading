@@ -71,20 +71,26 @@ import java.util.concurrent.ConcurrentHashMap;
  * This class maintains the tree data structure. It doesn't have any networking
  * or client connection code in it so that it can be tested in a stand alone
  * way.
+ * 不包含任何网络连接和通信，是一个独立的zk组件
  * <p>
  * The tree maintains two parallel data structures: a hashtable that maps from
  * full paths to DataNodes and a tree of DataNodes. All accesses to a path is
  * through the hashtable. The tree is traversed only when serializing to disk.
+ * 两个并行数据结构：
+ * hashtable，datanode的路径
+ * tree,datanodes
+ * 对路径的访问都是hashtable，只有序列化时才遍历树
  */
-//8--写请求都是通过processTxn方法来处理，读请求则分散在各个不同的方法被调用(读请求就是getxxx())
+//写请求都是通过processTxn方法来处理，读请求则分散在各个不同的方法被调用(读请求就是getxxx())
 public class DataTree {
     private static final Logger LOG = LoggerFactory.getLogger(DataTree.class);
 
     /**
      * This hashtable provides a fast lookup to the datanodes. The tree is the
      * source of truth and is where all the locking occurs
+     * key:数据节点路径
+     * value:节点数据内容，DataNode
      */
-    //8--节点路径-datanode对象 key-value
     private final ConcurrentHashMap<String, DataNode> nodes =
         new ConcurrentHashMap<String, DataNode>();
 
@@ -128,6 +134,7 @@ public class DataTree {
 
     /**
      * This hashtable lists the paths of the ephemeral nodes of a session.
+     * 临时节点
      */
     private final Map<Long, HashSet<String>> ephemerals =
         new ConcurrentHashMap<Long, HashSet<String>>();
@@ -796,6 +803,7 @@ public class DataTree {
 
     }
 
+    //已提交的最大的zxid，可用于生成数据快照文件名
     public volatile long lastProcessedZxid = 0;
 
     public ProcessTxnResult processTxn(TxnHeader header, Record txn) {
