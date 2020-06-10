@@ -282,12 +282,13 @@ public class Util {
     /**
      * Sort the list of files. Recency as determined by the version component
      * of the file name.
+     * 排序文件，实际上就是去掉前缀后根据zxid来排序
      *
      * @param files array of files
      * @param prefix files not matching this prefix are assumed to have a
      * version = -1)
      * @param ascending true sorted in ascending order, false results in
-     * descending order
+     * descending order 正序还是反序，这里实际上就是zxid排序
      * @return sorted input files
      */
     public static List<File> sortDataDir(File[] files, String prefix, boolean ascending)

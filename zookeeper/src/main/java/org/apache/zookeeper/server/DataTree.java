@@ -233,6 +233,11 @@ public class DataTree {
      */
     private final DataNode quotaDataNode = new DataNode(new byte[0], -1L, new StatPersisted());
 
+    /**
+     * 初始化DataTree
+     * 创建zk的一些默认节点
+     * 包括 '/', '/zookeeper' ,'/zookeeper/quota'三个节点
+     */
     public DataTree() {
         /* Rather than fight it, let root have an alias */
         nodes.put("", root);

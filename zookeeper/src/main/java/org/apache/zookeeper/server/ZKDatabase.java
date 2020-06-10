@@ -96,7 +96,9 @@ public class ZKDatabase {
      * @param snapLog the FileTxnSnapLog mapping this zkdatabase
      */
     public ZKDatabase(FileTxnSnapLog snapLog) {
+        //初始化datatree
         dataTree = createDataTree();
+        //会话超时时间管理器 key-sessionId value-超时时间
         sessionsWithTimeouts = new ConcurrentHashMap<Long, Integer>();
         this.snapLog = snapLog;
 
@@ -234,6 +236,7 @@ public class ZKDatabase {
     /**
      * load the database from the disk onto memory and also add
      * the transactions to the committedlog in memory.
+     * 返回最大的zxid
      * @return the last valid zxid on disk
      * @throws IOException
      */

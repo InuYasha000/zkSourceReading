@@ -78,6 +78,8 @@ public class FileTxnSnapLog {
      * restore to gather information
      * while the data is being
      * restored.
+     * 事务日志监听器，当成功将一条事务日志应用到内存数据库后，就会调用这个监听器
+     * 主要是转存到commitlog中，以便集群进行数据同步
      */
     public interface PlayBackListener {
         void onTxnLoaded(TxnHeader hdr, Record rec);
@@ -161,7 +163,9 @@ public class FileTxnSnapLog {
             checkSnapDir();
         }
 
+        //事务日志管理初始化
         txnLog = new FileTxnLog(this.dataDir);
+        //快照管理初始化
         snapLog = new FileSnap(this.snapDir);
     }
 
@@ -232,6 +236,7 @@ public class FileTxnSnapLog {
             return highestZxid;
         };
 
+        //没有任何快照
         if (-1L == deserializeResult) {
             /* this means that we couldn't find any snapshot, so we need to
              * initialize an empty database (reported in ZOOKEEPER-2325) */

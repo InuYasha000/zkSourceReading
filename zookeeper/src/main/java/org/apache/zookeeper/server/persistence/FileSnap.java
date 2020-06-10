@@ -65,6 +65,7 @@ public class FileSnap implements SnapShot {
 
     /**
      * deserialize a data tree from the most recent snapshot
+     * 在最近100个快照返回最大的zxid，这里有个疑问，明明用的降序排列拿到了最近100个快照，也就是最新的快照在list的第一位，遍历的时候却从0开始遍历。这里并未明白（大概率自己搞颠倒了）
      * @return the zxid of the snapshot
      */
     public long deserialize(DataTree dt, Map<Long, Integer> sessions)
@@ -72,6 +73,7 @@ public class FileSnap implements SnapShot {
         // we run through 100 snapshots (not all of them)
         // if we cannot get it running within 100 snapshots
         // we should  give up
+        //获取最近100个快照
         List<File> snapList = findNValidSnapshots(100);
         if (snapList.size() == 0) {
             return -1L;
@@ -140,7 +142,8 @@ public class FileSnap implements SnapShot {
      * checks for / at the end of the snapshot. This does
      * not mean that the snapshot is truly valid but is
      * valid with a high probability. also, the most recent 
-     * will be first on the list. 
+     * will be first on the list.
+     * 主要从有效性来考虑，返回最后n个快照，最后n个表示这n个最大可能是有效的(前面都时间长了不一定有效)
      * @param n the number of most recent snapshots
      * @return the last n snapshots (the number might be
      * less than n in case enough snapshots are not available).

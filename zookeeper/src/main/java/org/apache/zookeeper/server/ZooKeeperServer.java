@@ -163,13 +163,14 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
      * Creates a ZooKeeperServer instance. It sets everything up, but doesn't
      * actually start listening for clients until run() is invoked.
      *
-     * @param dataDir the directory to put the data
      */
     public ZooKeeperServer(FileTxnSnapLog txnLogFactory, int tickTime,
             int minSessionTimeout, int maxSessionTimeout, ZKDatabase zkDb) {
         serverStats = new ServerStats(this);
+        //初始化FileTxnSnapLog(内部包括事务日志和快照初始化)
         this.txnLogFactory = txnLogFactory;
         this.txnLogFactory.setServerStats(this.serverStats);
+        //zkdatabase初始化
         this.zkDb = zkDb;
         this.tickTime = tickTime;
         setMinSessionTimeout(minSessionTimeout);
@@ -184,6 +185,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
 
     /**
      * creates a zookeeperserver instance.
+     * new ZKDatabase(txnLogFactory) 将FileTxnSnapLog交给zkdatabase，以便内存数据库对事务日志和快照数据进行访问
      * @param txnLogFactory the file transaction snapshot logging class
      * @param tickTime the ticktime for the server
      * @throws IOException
@@ -461,6 +463,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             zkDb = new ZKDatabase(this.txnLogFactory);
         }
         if (!zkDb.isInitialized()) {
+            //加载快照
             loadData();
         }
     }
