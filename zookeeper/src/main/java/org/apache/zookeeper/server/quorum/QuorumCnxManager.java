@@ -87,6 +87,7 @@ import org.slf4j.LoggerFactory;
 
 //选举信息交换的Socket框架，采用Netty框架负责底层Socket链接管理，提供Select在多个Socket之间切换，先到先得处理选举交换
 //5--每一个QuorumPeer都有一个QuorumCnxManager对象负责选举期间QuorumPeer之间连接的建立和发送、接收消息队列的维护
+//也就是网络通信
 public class QuorumCnxManager {
     private static final Logger LOG = LoggerFactory.getLogger(QuorumCnxManager.class);
 

@@ -98,7 +98,7 @@ public class QuorumPeerConfig {
     protected long serverId = UNSET_SERVERID;
 
     protected QuorumVerifier quorumVerifier = null, lastSeenQuorumVerifier = null;
-    protected int snapRetainCount = 3;//一次清理最少快照和事务日志数
+    protected int snapRetainCount = 3;//清理后保留的快照和事务日志数
     protected int purgeInterval = 0;//定时时间
     protected boolean syncEnabled = true;
 

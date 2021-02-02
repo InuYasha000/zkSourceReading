@@ -111,8 +111,9 @@ public class QuorumPeerMain {
     protected void initializeAndRun(String[] args)
         throws ConfigException, IOException, AdminServerException
     {
-        //读取配置信息.解析zoo.cfg
+        //读取配置信息.解析 zoo.cfg 配置文件
         QuorumPeerConfig config = new QuorumPeerConfig();
+        //传递的只有一个参数，此时认为传递的是配置文件，此时就会去解析
         if (args.length == 1) {
             config.parse(args[0]);
         }
@@ -150,7 +151,7 @@ public class QuorumPeerMain {
           ServerCnxnFactory cnxnFactory = null;
           ServerCnxnFactory secureCnxnFactory = null;
 
-          //创建初始化ServerCnxnFactory
+          //创建初始化 ServerCnxnFactory 网络连接工厂
           if (config.getClientPortAddress() != null) {
               cnxnFactory = ServerCnxnFactory.createFactory();
               cnxnFactory.configure(config.getClientPortAddress(),
@@ -164,9 +165,9 @@ public class QuorumPeerMain {
                       true);
           }
 
-          //创建QuorumPeer
+          //创建 QuorumPeer ：一个zookeeper节点
           quorumPeer = getQuorumPeer();
-          //创建FileTxnSnapLog
+          //创建 FileTxnSnapLog ：磁盘数据管理组件
           quorumPeer.setTxnFactory(new FileTxnSnapLog(
                       config.getDataLogDir(),
                       config.getDataDir()));
@@ -183,7 +184,8 @@ public class QuorumPeerMain {
           quorumPeer.setInitLimit(config.getInitLimit());
           quorumPeer.setSyncLimit(config.getSyncLimit());
           quorumPeer.setConfigFileName(config.getConfigFilename());
-          //创建zkdatabase
+          //创建 zkdatabase ：内存数据库
+          //启动的时候就会去加载快照和事务日志到内存里面来
           quorumPeer.setZKDatabase(new ZKDatabase(quorumPeer.getTxnFactory()));
           quorumPeer.setQuorumVerifier(config.getQuorumVerifier(), false);
           if (config.getLastSeenQuorumVerifier()!=null) {
@@ -194,6 +196,7 @@ public class QuorumPeerMain {
           quorumPeer.setSecureCnxnFactory(secureCnxnFactory);
           quorumPeer.setSslQuorum(config.isSslQuorum());
           quorumPeer.setUsePortUnification(config.shouldUsePortUnification());
+          //设置当前节点类型
           quorumPeer.setLearnerType(config.getPeerType());
           quorumPeer.setSyncEnabled(config.getSyncEnabled());
           quorumPeer.setQuorumListenOnAllIPs(config.getQuorumListenOnAllIPs());
@@ -214,6 +217,7 @@ public class QuorumPeerMain {
           quorumPeer.initialize();
 
           quorumPeer.start();
+          //join方法把main方法卡死了，只要zk节点还在运行就不会退出
           quorumPeer.join();
       } catch (InterruptedException e) {
           // warn, but generally this is ok
