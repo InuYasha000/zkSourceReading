@@ -379,11 +379,16 @@ public class LearnerHandler extends ZooKeeperThread {
             tickOfNextAckDeadline = leader.self.tick.get()
                     + leader.self.initLimit + leader.self.syncLimit;
 
+            //在leader这边也是jute序列化和反序列化
+            //输入流，收数据
             ia = BinaryInputArchive.getArchive(bufferedInput);
             bufferedOutput = new BufferedOutputStream(sock.getOutputStream());
+            //输出流，发数据
             oa = BinaryOutputArchive.getArchive(bufferedOutput);
 
             QuorumPacket qp = new QuorumPacket();
+            //读取输入流到QuorumPacket
+            //点进去源码可以看到读取数据这块就是开头和结尾都是"packet"
             ia.readRecord(qp, "packet");
             if(qp.getType() != Leader.FOLLOWERINFO && qp.getType() != Leader.OBSERVERINFO){
                 LOG.error("First packet " + qp.toString()

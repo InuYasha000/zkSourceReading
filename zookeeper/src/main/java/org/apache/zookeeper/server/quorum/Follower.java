@@ -79,6 +79,7 @@ public class Follower extends Learner{
             QuorumServer leaderServer = findLeader();            
             try {
                 //6--1：链接到Leader，链接成功后Leader会创建一个LeaderHandler专门处理该Follower之间的QuorumPacket消息的传递
+                //最多连接5次
                 connectToLeader(leaderServer.addr, leaderServer.hostname);
                 //6--2：交换各自sid，zxid，Epoch，以此leader决定事务同步方式，注册到leader
                 long newEpochZxid = registerWithLeader(Leader.FOLLOWERINFO);
@@ -97,6 +98,7 @@ public class Follower extends Learner{
                 QuorumPacket qp = new QuorumPacket();
                 //--等待Peer的QuorumPacket包
                 while (this.isRunning()) {
+                    //这里是依托于外部QuorumPeer的循环
                     readPacket(qp);
                     processPacket(qp);
                 }

@@ -255,6 +255,9 @@ public class Leader {
             }
             ss.setReuseAddress(true);
             if (!self.getQuorumListenOnAllIPs()) {
+                //192.168.0.1:2888:3888
+                //2888：其实就是leader和follower之间通信端口
+                //3888：leader选举的通信端口
                 ss.bind(self.getQuorumAddress());
             }
         } catch (BindException e) {
@@ -409,19 +412,23 @@ public class Leader {
         public void run() {
             try {
                 while (!stop) {
-                    Socket s = null;
-                    boolean error = false;
-                    try {
-                        s = ss.accept();
+                                Socket s = null;
+                        boolean error = false;
+                        try {
+                            s = ss.accept();
 
                         // start with the initLimit, once the ack is processed
                         // in LearnerHandler switch to the syncLimit
+                        //设置超时时间
                         s.setSoTimeout(self.tickTime * self.initLimit);
+                        //禁止negal算法，不要批量打包
                         s.setTcpNoDelay(nodelay);
 
                         BufferedInputStream is = new BufferedInputStream(
                                 s.getInputStream());
                         //创建LearnerHandler线程，一个LearnerHandler对应一个Leader和Learner服务器之间的连接，负责两者之间的所有的消息通信和同步
+                        //其实这里就是一个连接对应一个独立线程服务于连接的网络通信
+                        //NIO则是少量线程服务于大量的网络连接
                         LearnerHandler fh = new LearnerHandler(s, is, Leader.this);
                         fh.start();
                     } catch (SocketException e) {
@@ -501,7 +508,8 @@ public class Leader {
 
             // Start thread that waits for connection requests from
             // new followers.
-            //follower acceptor线程,等待follower建立连接
+
+            //follower acceptor 线程,处理follower连接相关
             cnxAcceptor = new LearnerCnxAcceptor();
             cnxAcceptor.start();
             //6-2：-启用新的epoch，zookeeper中zixd是64位，用于唯一标识一个操作，zxid的高32位是epoch，每次Leader切换+1，低32位是序列号，每次操作+1

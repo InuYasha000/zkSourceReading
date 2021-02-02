@@ -293,9 +293,13 @@ public class Learner {
 
         self.authLearner.authenticate(sock, hostname);
 
+        //jute序列化，socket的输入流 sock.getInputStream() ，包装成缓冲流 new BufferedInputStream ,再包装成jute的 InputArchive
+        //在leader那边也是用的jute序列化和反序列化
+        //对于jute解决沾包拆包就是定义了固定格式，然后在开头和结束都是packet
         leaderIs = BinaryInputArchive.getArchive(new BufferedInputStream(
                 sock.getInputStream()));
         bufferedOutput = new BufferedOutputStream(sock.getOutputStream());
+        //输出流
         leaderOs = BinaryOutputArchive.getArchive(bufferedOutput);
     }
 
@@ -322,17 +326,26 @@ public class Learner {
          * Send follower info, including last zxid and sid
          */
     	long lastLoggedZxid = self.getLastLoggedZxid();
-        QuorumPacket qp = new QuorumPacket();                
+    	//这个是jute序列化的一个vo
+        QuorumPacket qp = new QuorumPacket();
+        //类型：Leader.FOLLOWERINF0
         qp.setType(pktType);
+        //设置zxid
         qp.setZxid(ZxidUtils.makeZxid(self.getAcceptedEpoch(), 0));
         
         /*
          * Add sid to payload
          */
         LearnerInfo li = new LearnerInfo(self.getId(), 0x10000, self.getQuorumVerifier().getVersion());
+        //字节数组输出流
         ByteArrayOutputStream bsid = new ByteArrayOutputStream();
+        //jute封装输出流
         BinaryOutputArchive boa = BinaryOutputArchive.getArchive(bsid);
+        //将 LearnerInfo li 这个对象序列化，写入底层的 ByteArrayOutputStream bsid
+        //writeRecord方法会调用 LearnerInfo.serialize() 方法
         boa.writeRecord(li, "LearnerInfo");
+        //把刚刚写入的上面的 ByteArrayOutputStream bsid 序列化后的数组设置到 QuorumPacket
+        //也就是先进行序列化，就可以转字节数组
         qp.setData(bsid.toByteArray());
         //6--发送FollerInfo包，告诉Leader自己的属性（Follower的zxid和sid）
         writePacket(qp, true);
