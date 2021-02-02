@@ -125,12 +125,14 @@ public abstract class ServerCnxnFactory {
     public abstract void closeAll();
     
     static public ServerCnxnFactory createFactory() throws IOException {
+        //这个可以配置使用NIO还是netty
         String serverCnxnFactoryName =
             System.getProperty(ZOOKEEPER_SERVER_CNXN_FACTORY);
         if (serverCnxnFactoryName == null) {
             serverCnxnFactoryName = NIOServerCnxnFactory.class.getName();
         }
         try {
+            //通过反射直接创建了一个对象实例
             ServerCnxnFactory serverCnxnFactory = (ServerCnxnFactory) Class.forName(serverCnxnFactoryName)
                     .getDeclaredConstructor().newInstance();
             LOG.info("Using {} as server connection factory", serverCnxnFactoryName);

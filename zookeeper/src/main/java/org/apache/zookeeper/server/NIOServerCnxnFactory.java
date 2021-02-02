@@ -643,6 +643,7 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory {
         if (secure) {
             throw new UnsupportedOperationException("SSL isn't supported in NIOServerCnxn");
         }
+        //授权认证相关
         configureSaslLogin();
 
         maxClientCnxns = maxcc;
@@ -748,6 +749,7 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory {
         }
         // ensure thread is started once and only once
         if (acceptThread.getState() == Thread.State.NEW) {
+            //这个线程其实就是执行nio的select，初始化是在当前configure方法
             acceptThread.start();
         }
         if (expirerThread.getState() == Thread.State.NEW) {

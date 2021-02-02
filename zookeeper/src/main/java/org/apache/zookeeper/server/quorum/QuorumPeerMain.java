@@ -152,6 +152,7 @@ public class QuorumPeerMain {
           ServerCnxnFactory secureCnxnFactory = null;
 
           //创建初始化 ServerCnxnFactory 网络连接工厂
+          //这里的网络连接是服务端和客户端的连接
           if (config.getClientPortAddress() != null) {
               cnxnFactory = ServerCnxnFactory.createFactory();
               cnxnFactory.configure(config.getClientPortAddress(),

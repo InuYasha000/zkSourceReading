@@ -434,10 +434,14 @@ public class ClientCnxn {
         this.hostProvider = hostProvider;
         this.chrootPath = chrootPath;
 
+        //连接超时时间
         connectTimeout = sessionTimeout / hostProvider.size();
+        //读取数据超时时间
         readTimeout = sessionTimeout * 2 / 3;
         readOnly = canBeReadOnly;
 
+        // SendThread是IO线程，主要负责zookeeper客户端和服务端之间的网络I/O通信，
+        // EventThread负责对服务端事件进行处理
         sendThread = new SendThread(clientCnxnSocket);
         eventThread = new EventThread();
         this.clientConfig=zooKeeper.getClientConfig();
@@ -1237,6 +1241,10 @@ public class ClientCnxn {
                             //TCP连接建立完成后，拿着之前的sessionId和密码发送ConnectRequest请求
                             //如果还未到该sessionId的超时时间，则表示自动重连成功，否则session失效(SessionExpired)对客户端用户是透明的，一切都在背后默默执行，ZooKeeper对象是有效的
                             //休息的原因在于可能列表中地址都连不上，所以休息一段时间再去链接
+
+                            //hostprovider是把打乱的机器列表做成一个环形，
+                            //在这个环形里面每次都会尝试从第一个开始，选择一台机器出来
+                            //每个客户端优先尝试的zk服务器都是随机的一台
                             serverAddress = hostProvider.next(1000);
                         }
                         //发起链接

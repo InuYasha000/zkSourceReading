@@ -288,7 +288,7 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
     throws IOException {
         sockKey = sock.register(selector, SelectionKey.OP_CONNECT);
         boolean immediateConnect = sock.connect(addr);
-        if (immediateConnect) {
+        if (immediateConnect) {//马上就建立成功了
             sendThread.primeConnection();//申请建立session关联(在建立tcp连接后)
         }
     }

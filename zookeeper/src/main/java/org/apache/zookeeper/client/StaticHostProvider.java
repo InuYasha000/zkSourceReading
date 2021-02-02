@@ -150,6 +150,7 @@ public final class StaticHostProvider implements HostProvider {
             throw new IllegalArgumentException(
                     "A HostProvider may not be empty!");
         }
+        //这里可以看到是打乱了的，也就是对于每个客户端的地址虽然都是一样的，但是具体排序是被打乱了的
         this.serverAddresses = shuffle(serverAddresses);
         currentIndex = -1;
         lastIndex = -1;

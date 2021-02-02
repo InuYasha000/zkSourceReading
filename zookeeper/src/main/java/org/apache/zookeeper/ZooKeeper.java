@@ -141,6 +141,8 @@ import java.util.Set;
 */
 @SuppressWarnings("try")
 @InterfaceAudience.Public
+//不管是你在客户端或者curator框架，要跟服务端建立连接，都会直接创建一个Zookeeper对象实例，就代表一个zk客户端
+//底层负责跟zk服务端建立长连接，维持一个session会话
 public class ZooKeeper implements AutoCloseable {
 
     /**
@@ -159,7 +161,9 @@ public class ZooKeeper implements AutoCloseable {
     public static final String SECURE_CLIENT = "zookeeper.client.secure";
 
     //--客户端和服务端底层通信接口,和ClientCnxnSocketNetty一起工作
-    //客户端核心线程，包含两个线程，SendThread和EventThread，SendThread是IO线程，主要负责zookeeper客户端和服务端之间的网络I/O通信，EventThread负责对服务端事件进行处理
+    //客户端核心线程，包含两个线程，SendThread和EventThread，
+    // SendThread是IO线程，主要负责zookeeper客户端和服务端之间的网络I/O通信，
+    // EventThread负责对服务端事件进行处理
     protected final ClientCnxn cnxn;
     private static final Logger LOG;
     static {
@@ -690,6 +694,13 @@ public class ZooKeeper implements AutoCloseable {
      * @throws IllegalArgumentException
      *             if an invalid chroot path is specified
      */
+    /**
+     *
+     * @param connectString 传递的所有zk服务器地址 192.168.0.1:2181
+     * @param sessionTimeout 但建立了一个长连接，就会建立一个会话，一旦超过一定时间不通信，会话就会失效，这个就是过期时间
+     * @param watcher 监听器，比如连接建立成功了就会回调到这个watcher
+     * @throws IOException
+     */
     public ZooKeeper(String connectString, int sessionTimeout, Watcher watcher)
         throws IOException
     {
@@ -890,15 +901,21 @@ public class ZooKeeper implements AutoCloseable {
         //1--1：创建默认watcher
         watchManager = defaultWatchManager();
         watchManager.defaultWatcher = watcher;
+        //在这个里面是对地址根据“，”做了切割了的，然后给到ConnectStringParser.serverAddresses（List结构）
+        //比如192.168.0.1:2181,192.168.0.2:2181，就会根据“，”切割成两个地址
+        //同时还会取出来根目录比如传进来地址是 192.168.0.01:2181/data/crm
+        //此时会根据“/”截取路径，后续这个客户端所有的znode操作都是在你指定的chroot路径下执行，此时根目录就是 /data/crm
+        //比如 set /field 1 此时就会变成 set /data/crm/field  1
         ConnectStringParser connectStringParser = new ConnectStringParser(
                 connectString);
         //1--2:设置zk服务器地址列表
         hostProvider = aHostProvider;
-        //1--3:创建ClientCnxn，同时初始化outgoingqueue和pendingqueue
+        //1--3:创建ClientCnxn，同时初始化 outgoingqueue 和 pendingqueue,初始化sendThread和eventThread
+        // getClientCnxnSocket() 默认返回NIO
         cnxn = createConnection(connectStringParser.getChrootPath(),
                 hostProvider, sessionTimeout, this, watchManager,
                 getClientCnxnSocket(), canBeReadOnly);
-        //1--4:初始化sendThread和eventThread并启动
+        //1--4:sendThread和eventThread启动
         cnxn.start();
     }
 
