@@ -27,9 +27,9 @@ import org.apache.zookeeper.server.quorum.QuorumPeer.QuorumServer;
  * All quorum validators have to implement a method called
  * containsQuorum, which verifies if a HashSet of server 
  * identifiers constitutes a quorum.
- * 选举算法中的选举算法接口
  */
 
+//选举算法中的选举算法接口
 public interface QuorumVerifier {
     long getWeight(long id);//权重
     boolean containsQuorum(Set<Long> set);//大多数选举算法

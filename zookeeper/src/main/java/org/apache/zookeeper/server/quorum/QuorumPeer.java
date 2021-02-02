@@ -1259,6 +1259,7 @@ public class QuorumPeer extends ZooKeeperThread implements QuorumStats.Provider 
                                 startLeaderElection();
                             }
                             //--选举逻辑入口
+                            //在这里知道谁是leader后会再次循环，然后就开始做自己的事情
                             setCurrentVote(makeLEStrategy().lookForLeader());
                         } catch (Exception e) {
                             LOG.warn("Unexpected exception", e);

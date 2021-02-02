@@ -148,8 +148,8 @@ public class QuorumCnxManager {
      */
     //5--发送器集合。每个SenderWorker消息发送器，都对应一台远程ZooKeeper服务器，负责消息的发送，在这个集合中，key也是sid
     final ConcurrentHashMap<Long, SendWorker> senderWorkerMap;
-    //5--发送队列，每个机器占据一个单独队列，保证各台机器消息发送各不影响，key=sid(quorumpeer的地址),网络发送的队列
-    //5--SendWorker线程发送
+        //5--`发送队列，每个机器占据一个单独队列`，保证各台机器消息发送各不影响，key=sid(quorumpeer的地址),网络发送的队列
+    //5--SendWorker线程发送,
     final ConcurrentHashMap<Long, ArrayBlockingQueue<ByteBuffer>> queueSendMap;
     //5--最近发送过的消息。在这个集合中，为每个SID保留最近发送过的一个消息，key也是sid
     final ConcurrentHashMap<Long, ByteBuffer> lastMessageSent;
@@ -354,6 +354,7 @@ public class QuorumCnxManager {
      * If this server has initiated the connection, then it gives up on the
      * connection if it loses challenge. Otherwise, it keeps the connection.
      */
+    //初始化连接
     public void initiateConnection(final Socket sock, final Long sid) {
         try {
             startConnection(sock, sid);
@@ -414,6 +415,7 @@ public class QuorumCnxManager {
         }
     }
 
+    //发送方
     private boolean startConnection(Socket sock, Long sid)
             throws IOException {
         DataOutputStream dout = null;
@@ -421,6 +423,7 @@ public class QuorumCnxManager {
         try {
             // Use BufferedOutputStream to reduce the number of IP packets. This is
             // important for x-DC scenarios.
+            //这里看出来就是BIO，直接将自己的id，地址等信息写了过去
             BufferedOutputStream buf = new BufferedOutputStream(sock.getOutputStream());
             dout = new DataOutputStream(buf);
 
@@ -430,7 +433,9 @@ public class QuorumCnxManager {
             dout.writeLong(self.getId());
             String addr = formatInetAddr(self.getElectionAddress());
             byte[] addr_bytes = addr.getBytes();
+            //长度
             dout.writeInt(addr_bytes.length);
+            //内容
             dout.write(addr_bytes);
             dout.flush();
 
@@ -450,6 +455,7 @@ public class QuorumCnxManager {
         }
 
         // If lost the challenge, then drop the new connection
+        //别人的sid比你大，关掉
         if (sid > self.getId()) {
             LOG.info("Have smaller server identifier, so dropping the " +
                     "connection: (" + sid + ", " + self.getId() + ")");
@@ -483,9 +489,9 @@ public class QuorumCnxManager {
      * connection if it wins. Notice that it checks whether it has a connection
      * to this server already or not. If it does, then it sends the smallest
      * possible long value to lose the challenge.
-     * 当有新的连接到来时，会根据sid大小来判断是否建立新的连接，详见handleConnection()
      *
      */
+    //当有新的连接到来时，会根据sid大小来判断是否建立新的连接，详见handleConnection()
     public void receiveConnection(final Socket sock) {
         DataInputStream din = null;
         try {
@@ -532,6 +538,7 @@ public class QuorumCnxManager {
         }
     }
 
+    //接收方
     private void handleConnection(Socket sock, DataInputStream din)
             throws IOException {
         Long sid = null, protocolVersion = null;
@@ -570,6 +577,8 @@ public class QuorumCnxManager {
         // do authenticating learner
         authServer.authenticate(sock, din);
         //If wins the challenge, then close the new connection.
+        //接收方发现来建立连接的sid比自己小，关掉
+        //其实场景就是这样：现在有myid：1,2,3的机器。1先启动，此时它不会去跟比人建立连接， 只会等着2,3机器过来
         if (sid < self.getId()) {
             /*
              * This replica might still believe that the connection to sid is
@@ -663,6 +672,7 @@ public class QuorumCnxManager {
         try {
             LOG.debug("Opening channel to server " + sid);
             if (self.isSslQuorum()) {
+                //zk底层，直接基于java socket进行tcp进行tcp协议的通信的
                  SSLSocket sslSock = self.getX509Util().createSSLSocket();
                  setSockOpts(sslSock);
                  sslSock.connect(electionAddr, cnxTO);
@@ -935,9 +945,11 @@ public class QuorumCnxManager {
                     }
                     LOG.info("My election bind port: " + addr.toString());
                     setName(addr.toString());
+                    //绑定到一个地址上
                     ss.bind(addr);
                     while (!shutdown) {
                         try {
+                            //传统的BIO
                             client = ss.accept();
                             setSockOpts(client);
                             LOG.info("Received connection request "

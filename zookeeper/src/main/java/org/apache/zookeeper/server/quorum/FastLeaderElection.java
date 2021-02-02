@@ -86,9 +86,9 @@ public class FastLeaderElection implements Election {
      * Connection manager. Fast leader election uses TCP for
      * communication between peers, and QuorumCnxManager manages
      * such connections.
-     * QuorumCnxManager利用TCP实现leader选举
      */
 
+    //QuorumCnxManager利用TCP实现leader选举
     QuorumCnxManager manager;
 
 
@@ -221,7 +221,7 @@ public class FastLeaderElection implements Election {
     //Tosend
     LinkedBlockingQueue<ToSend> sendqueue;
     //Notification
-    //--从QuoruoCxnManage获取网络接收到的message包，组成Notification消息，放入recvqueue队列,-------不是网络接受的包，
+    //--从 QuorumCnxManage 获取网络接收到的message包，组成Notification消息，放入recvqueue队列,-------不是网络接受的包，
     LinkedBlockingQueue<Notification> recvqueue;
 
     /**
@@ -703,9 +703,12 @@ public class FastLeaderElection implements Election {
 
     /**
      * Send notifications to all peers upon a change in our vote
+     */
+    /**
      * 初始化投票并放入{@link sendqueue},由发送器WorkerSender#run()
      */
     private void sendNotifications() {
+        //对选举的所有服务器
         for (long sid : self.getCurrentAndNextConfigVoters()) {
             QuorumVerifier qv = self.getQuorumVerifier();
             ToSend notmsg = new ToSend(ToSend.mType.notification,
@@ -745,7 +748,7 @@ public class FastLeaderElection implements Election {
      * @param id    Server identifier
      * @param zxid  Last zxid observed by the issuer of this vote
      */
-    //5--比较的顺序是Epoch、zxid、Id，优先选投票轮次高的，投票轮次相同选Zxid高的，Zxid相同选id高的，
+    //5--比较的顺序是Epoch、zxid、Id，优先选投票轮次高的，投票轮次相同选Zxid高的，Zxid相同选myid高的，
     // 因此在Zookeeper启动的时候，往往id高的获得Leader，
     // 但不绝对，比如在5个节点的集群中，启动顺序分别是1->2->3->4->5，
     // 当票选到节点3时已经票选超过半数，那么后面启动的4和5就直接成为follower
@@ -765,6 +768,7 @@ public class FastLeaderElection implements Election {
          *  as current zxid, but server id is higher.
          */
         //5--这里已经做了详细说明
+        //比较的顺序是Epoch、zxid、Id，优先选投票轮次高的，投票轮次相同选Zxid高的，Zxid相同选myid高的，
         return ((newEpoch > curEpoch) ||
                 ((newEpoch == curEpoch) &&
                 ((newZxid > curZxid) || ((newZxid == curZxid) && (newId > curId)))));
@@ -915,6 +919,9 @@ public class FastLeaderElection implements Election {
      * Starts a new round of leader election. Whenever our QuorumPeer
      * changes its state to LOOKING, this method is invoked, and it
      * sends notifications to all other peers.
+     *
+     */
+    /**
      * 开始新一轮选举，当QuorumPeer状态变为LOOKING，调用这个方法通知其他的QuorumPeer
      */
     public Vote lookForLeader() throws InterruptedException {
@@ -973,6 +980,7 @@ public class FastLeaderElection implements Election {
                  */
                 //如果发现无法获得外部投票，检查自己和集群中其它服务器是否连接正常，
                 //没有链接则建立连接，有链接则再次发送
+                //这里算是建立连接
                 if(n == null){
                     //5--检查网络发送队列queueSendMap是否为空，再次发送
                     if(manager.haveDelivered()){
@@ -1031,7 +1039,8 @@ public class FastLeaderElection implements Election {
                             }
                             break;
                         } else if (totalOrderPredicate(n.leader, n.zxid, n.peerEpoch,
-                                proposedLeader, proposedZxid, proposedEpoch)) {//5--周期相同
+                                proposedLeader, proposedZxid, proposedEpoch)) {//5--投票周期相同
+                            //更新
                             updateProposal(n.leader, n.zxid, n.peerEpoch);
                             //5--告诉其他人
                             sendNotifications();
@@ -1045,7 +1054,7 @@ public class FastLeaderElection implements Election {
                         }
 
                         // don't care about the version if it's in LOOKING state
-                        //记录收到的选举信息
+                        //记录收到的选举信息，在下面有用
                         recvset.put(n.sid, new Vote(n.leader, n.zxid, n.electionEpoch, n.peerEpoch));
 
                         //--QuorumHierarchical.containsQuorum()或者QuorumMaj.containsQuorum()
@@ -1081,6 +1090,7 @@ public class FastLeaderElection implements Election {
                                 Vote endVote = new Vote(proposedLeader,
                                         proposedZxid, logicalclock.get(), 
                                         proposedEpoch);
+                                //离开当前投票状态，if逻辑里面有判断是否自己是leader
                                 leaveInstance(endVote);
                                 return endVote;
                             }
@@ -1103,6 +1113,7 @@ public class FastLeaderElection implements Election {
                             if(termPredicate(recvset, new Vote(n.version, n.leader,
                                             n.zxid, n.electionEpoch, n.peerEpoch, n.state))
                                             && checkLeader(outofelection, n.leader, n.electionEpoch)) {
+                                //在这里设置了自己是什么 leader？follower？然后在最外面的QuorumPeer循环走到下一轮就知道根据自己角色做什么事情
                                 self.setPeerState((n.leader == self.getId()) ?
                                         ServerState.LEADING: learningState());
                                 Vote endVote = new Vote(n.leader, 
