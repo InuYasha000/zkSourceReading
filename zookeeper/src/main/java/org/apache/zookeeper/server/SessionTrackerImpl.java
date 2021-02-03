@@ -159,6 +159,7 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
                     continue;
                 }
 
+                //记住 sessionExpiryQueue.poll() 如果此时没有session过期，这个是返回空的set，null会报错
                 for (SessionImpl s : sessionExpiryQueue.poll()) {
                     //1标记会话状态为已关闭isClosing = true
                     setSessionClosing(s.sessionId);

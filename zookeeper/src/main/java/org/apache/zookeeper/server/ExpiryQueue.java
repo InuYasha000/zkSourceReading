@@ -180,8 +180,10 @@ public class ExpiryQueue<E> {
         long newExpirationTime = expirationTime + expirationInterval;
         if (nextExpirationTime.compareAndSet(
               expirationTime, newExpirationTime)) {
+            //这里才是关键，expirationTime 可能是没值的，所以在下面才会判断
             set = expiryMap.remove(expirationTime);
         }
+        //这里的删除逻辑跟前面跟前面不太一样，所以这个有一个非null的判断
         if (set == null) {
             return Collections.emptySet();
         }
