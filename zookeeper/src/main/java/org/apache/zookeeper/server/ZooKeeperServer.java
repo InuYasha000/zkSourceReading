@@ -103,6 +103,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     protected int minSessionTimeout = -1;
     /** value of -1 indicates unset, use default */
     protected int maxSessionTimeout = -1;
+    //管理session
     protected SessionTracker sessionTracker;
     private FileTxnSnapLog txnLogFactory = null;
     private ZKDatabase zkDb;
@@ -1027,7 +1028,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
     //会话创建请求
     public void processConnectRequest(ServerCnxn cnxn, ByteBuffer incomingBuffer) throws IOException {
         BinaryInputArchive bia = BinaryInputArchive.getArchive(new ByteBufferInputStream(incomingBuffer));
-        //反序列化ConnectRequest
+        //基于jute反序列化ConnectRequest
         ConnectRequest connReq = new ConnectRequest();
         connReq.deserialize(bia, "connect");
         if (LOG.isDebugEnabled()) {
@@ -1084,6 +1085,7 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
         cnxn.disableRecv();
         long sessionId = connReq.getSessionId();
         //根据是否包含sessionId判断客户端是在进行重新连接还是创建会话
+        //最开始sessionId是空的
         if (sessionId == 0) {//创建会话
             //生成sessionId
             long id = createSession(cnxn, passwd, sessionTimeout);

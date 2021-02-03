@@ -302,6 +302,9 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory {
                     selectorIterator = selectorThreads.iterator();
                 }
                 SelectorThread selectorThread = selectorIterator.next();
+                //新版代码服务端使用了多个selectorThread来处理OP_READ和OP_WRITE事件
+                //在这里AcceptThread把连接建立好的SocketChannel给了selectorThread
+                //然后selectorThread再去处理这个socketChannel的OP_READ和OP_WRITE事件
                 if (!selectorThread.addAcceptedConnection(sc)) {
                     throw new IOException(
                         "Unable to add connection to selector queue"
@@ -386,6 +389,7 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory {
          */
         public void run() {
             try {
+                //出了这个while循环就表示服务停了，下面就是去快速关闭socketChannel
                 while (!stopped) {
                     try {
                         select();
@@ -408,6 +412,7 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory {
                     cleanupSelectionKey(key);
                 }
                 SocketChannel accepted;
+                //快速关闭socketChannel
                 while ((accepted = acceptedQueue.poll()) != null) {
                     fastCloseSock(accepted);
                 }
@@ -520,6 +525,7 @@ public class NIOServerCnxnFactory extends ServerCnxnFactory {
             this.cnxn = (NIOServerCnxn) key.attachment();
         }
 
+        //经过一大串代码后进入到这里来
         public void doWork() throws InterruptedException {
             if (!key.isValid()) {
                 selectorThread.cleanupSelectionKey(key);

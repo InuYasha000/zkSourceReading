@@ -1048,6 +1048,8 @@ public class ClientCnxn {
         //--和服务器建立连接成功后，客户端sendThread发送ConnectRequest请求，申请建立session关联，此时服务器端会为该客户端分配sessionId和密码，同时开启对该session是否超时的检测。
         //--把该请求放到outgoingQueue请求队列中，等待被发送给服务器。
         //--将该请求包装成网络I/O层的Packet对象，放入发送队列outgoingQueue中去。
+
+        //底层物理连接建立了，此时建立上层session连接
         void primeConnection() throws IOException {
             LOG.info("Socket connection established, initiating session, client: {}, server: {}",
                     clientCnxnSocket.getLocalSocketAddress(),
@@ -1061,9 +1063,9 @@ public class ClientCnxn {
             // TODO: here we have the only remaining use of zooKeeper in
             // this class. It's to be eliminated!
             if (!clientConfig.getBoolean(ZKClientConfig.DISABLE_AUTO_WATCH_RESET)) {//watcher是否跟着session reconnect重新设置
-                List<String> dataWatches = zooKeeper.getDataWatches();
-                List<String> existWatches = zooKeeper.getExistWatches();
-                List<String> childWatches = zooKeeper.getChildWatches();
+                List<String> dataWatches = zooKeeper.getDataWatches();//数据变化
+                List<String> existWatches = zooKeeper.getExistWatches();//节点是否存在
+                List<String> childWatches = zooKeeper.getChildWatches();//子节点监听
                 if (!dataWatches.isEmpty()
                         || !existWatches.isEmpty() || !childWatches.isEmpty()) {
                     Iterator<String> dataWatchesIter = prependChroot(dataWatches).iterator();
@@ -1116,6 +1118,7 @@ public class ClientCnxn {
             //--把该请求放到outgoingQueue请求队列中，等待被发送给服务器。
             outgoingQueue.addFirst(new Packet(null, null, conReq,
                     null, null, readOnly));
+            //后面连接关注读写请求
             clientCnxnSocket.connectionPrimed();
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Session establishment request sent on "
@@ -1351,6 +1354,8 @@ public class ClientCnxn {
                     //---总而言之，这个方法不仅是发送请求的，也是接受返回的，也就是回调(ClientCnxnSocketNIO是的，ClientCnxnSocketNetty不是的)
                     //4回调ClientCnxnSocketNIO.doIO()
                     //4回调ClientCnxnSocketNetty.channelRead0
+
+                    //基于底层封装的ClientCnxnSocket把outgoingQueue里的数据发送出去
                     clientCnxnSocket.doTransport(to, pendingQueue, ClientCnxn.this);
                 } catch (Throwable e) {
                     if (closing) {

@@ -58,6 +58,7 @@ import org.slf4j.LoggerFactory;
 //NIOServerCnxn继承了ServerCnxn抽象类，使用NIO来处理与客户端之间的通信，使用单线程处理。
 //NIOServerCnxn维护了服务器与客户端之间的Socket通道、用于存储传输内容的缓冲区、会话ID、ZooKeeper服务器等
 //负责接收来自客户端的所有请求，并将请求内容从底层I/O读取出来
+//一个连接对应一个NIOServerSnxn
 public class NIOServerCnxn extends ServerCnxn {
     private static final Logger LOG = LoggerFactory.getLogger(NIOServerCnxn.class);
     // ServerCnxn工厂
@@ -172,6 +173,7 @@ public class NIOServerCnxn extends ServerCnxn {
 
     /** Read the request payload (everything following the length prefix) */
     private void readPayload() throws IOException, InterruptedException {
+        //写的什么玩意，怎么会走到这里来？？？
         if (incomingBuffer.remaining() != 0) { // have we read length bytes?
             int rc = sock.read(incomingBuffer); // sock is non-blocking, so ok
             if (rc < 0) {
@@ -185,6 +187,8 @@ public class NIOServerCnxn extends ServerCnxn {
         if (incomingBuffer.remaining() == 0) { // have we read length bytes?
             packetReceived();
             incomingBuffer.flip();
+            //此时还没有session初始化，这里就是服务端session建立关键
+            //里面有session建立代码
             if (!initialized) {//确定是不是会话创建请求
                 readConnectRequest();
             } else {
@@ -339,6 +343,7 @@ public class NIOServerCnxn extends ServerCnxn {
             }
             if (k.isReadable()) {
                 // 将内容从socket写入incoming缓冲
+                //先读4个字节
                 int rc = sock.read(incomingBuffer);
                 if (rc < 0) {// 流结束异常，无法从客户端读取数据
                     throw new EndOfStreamException(

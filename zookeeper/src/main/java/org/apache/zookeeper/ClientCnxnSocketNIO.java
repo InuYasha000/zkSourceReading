@@ -74,7 +74,8 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
         if (sock == null) {
             throw new IOException("Socket is null!");
         }
-        //1--回调
+        //1--回调（太菜了，竟然这么认为）
+        //有数据可以读取，或者是zk服务端返回给你的响应
         if (sockKey.isReadable()) {
             int rc = sock.read(incomingBuffer);
             if (rc < 0) {
@@ -111,6 +112,7 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
                 }
             }
         }
+        //当前网络通道可以写
         if (sockKey.isWritable()) {
             //---这里才是真正发送给服务端
             //4--并把Packet放入pendingQueue(CLientCnxn接受服务端返回结果的队列)，以便等待服务端响应后进行相应的处理
@@ -131,9 +133,12 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
                     }
                     p.createBB();
                 }
+                //把这个packet数据采用ByteBuffer的模式通过socket写出去
                 sock.write(p.bb);
+                //处理拆包问题
                 if (!p.bb.hasRemaining()) {
                     sentCount.getAndIncrement();
+                    //这里才会删除
                     outgoingQueue.removeFirstOccurrence(p);
                     if (p.requestHeader != null
                             && p.requestHeader.getType() != OpCode.ping
@@ -153,6 +158,8 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
                 // from within ZooKeeperSaslClient (if client is configured
                 // to attempt SASL authentication), or in either doIO() or
                 // in doTransport() if not.
+
+                //发现outgogoingQueue为空，取消OP_WRITE关注，避免发现可以执行OP_WRITE事件但是代码在这里发现队列为空
                 disableWrite();
             } else if (!initialized && p != null && !p.bb.hasRemaining()) {
                 // On initial connection, write the complete connect request
@@ -167,11 +174,15 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
                 disableWrite();
             } else {
                 // Just in case
+                //关注OP_WRITE事件
                 enableWrite();
             }
         }
     }
 
+    /**
+     * 这个方法并未出队列
+     */
     private Packet findSendablePacket(LinkedBlockingDeque<Packet> outgoingQueue,
                                       boolean tunneledAuthInProgres) {
         if (outgoingQueue.isEmpty()) {
@@ -193,7 +204,7 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
             if (p.requestHeader == null) {
                 // We've found the priming-packet. Move it to the beginning of the queue.
                 iter.remove();
-                outgoingQueue.addFirst(p);//这里不是造成死循环吗?
+                outgoingQueue.addFirst(p);//这里不是造成死循环吗?，这里其实是把 p.requestHeader == null 的放到队列头部
                 return p;
             } else {
                 // Non-priming packet: defer it until later, leaving it in the queue
@@ -287,6 +298,7 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
     void registerAndConnect(SocketChannel sock, InetSocketAddress addr) 
     throws IOException {
         sockKey = sock.register(selector, SelectionKey.OP_CONNECT);
+        //这只能算底层物理连接
         boolean immediateConnect = sock.connect(addr);
         if (immediateConnect) {//马上就建立成功了
             sendThread.primeConnection();//申请建立session关联(在建立tcp连接后)
@@ -360,6 +372,7 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
     @Override
     void doTransport(int waitTimeOut, List<Packet> pendingQueue, ClientCnxn cnxn)
             throws IOException, InterruptedException {
+        //关注OP_READ和OP_WRITE事件
         selector.select(waitTimeOut);
         Set<SelectionKey> selected;
         synchronized (this) {
@@ -371,7 +384,7 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
         updateNow();
         for (SelectionKey k : selected) {
             SocketChannel sc = ((SocketChannel) k.channel());
-            if ((k.readyOps() & SelectionKey.OP_CONNECT) != 0) {
+            if ((k.readyOps() & SelectionKey.OP_CONNECT) != 0) {//这里是再次判断是否已经建立了连接，前面已经判断过了
                 if (sc.finishConnect()) {//已经和服务器建立连接成功后
                     updateLastSendAndHeard();
                     updateSocketAddresses();
