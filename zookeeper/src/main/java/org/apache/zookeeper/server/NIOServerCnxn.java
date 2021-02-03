@@ -189,6 +189,8 @@ public class NIOServerCnxn extends ServerCnxn {
             incomingBuffer.flip();
             //此时还没有session初始化，这里就是服务端session建立关键
             //里面有session建立代码
+
+            //初始化好了后，比如后续Ping就走的下面，不是上面
             if (!initialized) {//确定是不是会话创建请求
                 readConnectRequest();
             } else {
@@ -246,6 +248,7 @@ public class NIOServerCnxn extends ServerCnxn {
 
             // Remove the buffers that we have sent
             ByteBuffer bb;
+            //在这里发送回去响应的，给我看吐了
             while ((bb = outgoingBuffers.peek()) != null) {
                 if (bb == ServerCnxnFactory.closeConn) {
                     throw new CloseRequestException("close requested");

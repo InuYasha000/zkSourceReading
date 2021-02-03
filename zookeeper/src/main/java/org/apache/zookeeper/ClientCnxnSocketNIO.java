@@ -84,12 +84,14 @@ public class ClientCnxnSocketNIO extends ClientCnxnSocket {
                                 + Long.toHexString(sessionId)
                                 + ", likely server has closed socket");
             }
+            //第一次读取了4个字节的头，这里是判断有没有拆包
             if (!incomingBuffer.hasRemaining()) {
                 incomingBuffer.flip();
+                //这里是判断当前读是读的长度还是读的内容，因为这个是循环，每次读的内容不一样
                 if (incomingBuffer == lenBuffer) {
                     recvCount.getAndIncrement();
                     readLength();
-                } else if (!initialized) {//1--也就是当前客户端和服务端之间正在进行会话创建
+                } else if (!initialized) {//1--也就是当前客户端和服务端之间正在进行会话创建，比如createSession
                     //1--首先判断当前的客户端状态是否是“已初始化”
                     //将接收到的ByteBuffer(incomebuffer)序列化为ConnectRequest对象
                     readConnectResult();

@@ -910,6 +910,7 @@ public class PrepRequestProcessor extends ZooKeeperCriticalThread implements
             }
         }
         request.zxid = zks.getZxid();
+        //看得出来Ping没有做任何事，只是交给了下一个processor
         nextProcessor.processRequest(request);
     }
 

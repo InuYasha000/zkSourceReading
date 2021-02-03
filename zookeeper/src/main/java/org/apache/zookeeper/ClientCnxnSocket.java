@@ -60,7 +60,7 @@ abstract class ClientCnxnSocket {
     /**
      * After the length is read, a new incomingBuffer is allocated in
      * readLength() to receive the full message.
-     * 读取长度后，在readLength（）接收完整消息
+     * 读取长度后，在readLength（）接收消息长度
      */
     protected ByteBuffer incomingBuffer = lenBuffer;
     protected final AtomicLong sentCount = new AtomicLong(0L);//发送次数
@@ -124,6 +124,7 @@ abstract class ClientCnxnSocket {
         this.lastHeard = now;
     }
 
+    //这里就是读取内容长度，把incomingBuffer赋值成内容长度的ByteBuffer
     void readLength() throws IOException {
         int len = incomingBuffer.getInt();
         if (len < 0 || len >= packetLen) {

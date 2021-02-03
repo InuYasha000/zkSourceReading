@@ -176,9 +176,6 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
      * 客户端会在会话超时时间范围内发送Ping请求来保持会话有效性，也就是心跳检查
      * 服务端接收到心跳检查后会重新激活客户端会话，这个过程就叫做touchSession
      * 会话激活过程，不仅能让服务器检测到客户端的存活性，同时也能让客户端自己保持连接状态
-     * @param sessionId
-     * @param timeout
-     * @return
      */
     synchronized public boolean touchSession(long sessionId, int timeout) {
         SessionImpl s = sessionsById.get(sessionId);

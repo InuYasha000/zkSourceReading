@@ -1323,6 +1323,7 @@ public class ClientCnxn {
                         //--最后一次发送数据包的时间与当前时间的间隔  clientCnxnSocket.getIdleSend()
                         if (timeToNextPing <= 0 || clientCnxnSocket.getIdleSend() > MAX_SEND_PING_INTERVAL) {
                             //--也是放到outgoingQueue等待发送
+                            //也就是客户端每隔一段时间一定会发送Ping
                             sendPing();
                             clientCnxnSocket.updateLastSend();
                         } else {
