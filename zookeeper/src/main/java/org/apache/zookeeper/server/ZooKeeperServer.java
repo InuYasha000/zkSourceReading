@@ -697,6 +697,9 @@ public class ZooKeeperServer implements SessionExpirer, ServerStats.Provider {
             passwd = new byte[0];
         }
         //会话注册，会话激活
+        //1:递增生成一个唯一的sessionId
+        //2:在内存数据结构中放入sessionId
+        //3:对session计算过期时间并放入
         long sessionId = sessionTracker.createSession(timeout);
         //生成会话密码
         Random r = new Random(sessionId ^ superSecret);

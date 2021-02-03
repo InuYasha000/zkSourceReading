@@ -59,6 +59,18 @@ public class ExpiryQueue<E> {
         nextExpirationTime.set(roundToNextInterval(Time.currentElapsedTime()));
     }
 
+    //expirationInterval:用来后续在后台线程里每隔这么多时间检查session是否过期
+    //默认跟ticktime一样大，2s
+    //(12:05 / 2s + 1 ) * 2s
+    //其实就是分到下一个桶
+    // (2/2+1)*2=4;
+    // (3/2+1)*2=4;
+    // (4/2+1)*2=6;
+    // (5/2+1)*2=6;
+    // (6/2+1)*2=8;
+    //就是让你的过期时间是 expirationInterval 的倍数
+    //这样就使得很多sessionTimeout不一样的session是会被分到一块去的，也就是认为他们的过期时间是一致的
+    //可以从构造函数一路往上追可以看到 expirationInterval 是 tickTime，也就是zk的基准时间间隔
     private long roundToNextInterval(long time) {
         return (time / expirationInterval + 1) * expirationInterval;
     }
@@ -86,17 +98,22 @@ public class ExpiryQueue<E> {
     /**
      * Adds or updates expiration time for element in queue, rounding the
      * timeout to the expiry interval bucketed used by this queue.
-     * 添加或更新队列中元素的过期时间
-     * 四舍五入此队列使用的过期间隔超时
-     * 讲会话从prevExpiryTime区块迁移到newExpiryTime区块，更多请百度zk分桶策略
      * @param elem     element to add/update
      * @param timeout  timout in milliseconds
      * @return         time at which the element is now set to expire if
      *                 changed, or null if unchanged
      */
+    /**
+     * 添加或更新队列中元素的过期时间
+     * 四舍五入此队列使用的过期间隔超时
+     * 讲会话从prevExpiryTime区块迁移到newExpiryTime区块，更多请百度zk分桶策略
+     */
     public Long update(E elem, int timeout) {
         Long prevExpiryTime = elemMap.get(elem);
         long now = Time.currentElapsedTime();
+        //新的过期时间
+        //这样就使得很多sessionTimeout不一样的session是会被分到一块去的，也就是认为他们的过期时间是一致的
+        //这样就非常方便管理session的过期
         Long newExpiryTime = roundToNextInterval(now + timeout);
 
         if (newExpiryTime.equals(prevExpiryTime)) {
@@ -105,6 +122,7 @@ public class ExpiryQueue<E> {
         }
 
         // First add the elem to the new expiry time bucket in expiryMap.
+        //一样的过期时间放到同一个桶里面，其实就是放到一个set数据结构
         Set<E> set = expiryMap.get(newExpiryTime);
         if (set == null) {
             // Construct a ConcurrentHashSet using a ConcurrentHashMap

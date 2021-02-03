@@ -84,11 +84,12 @@ public class SessionTrackerImpl extends ZooKeeperCriticalThread implements
     /**
      * Generates an initial sessionId. High order byte is serverId, next 5
      * 5 bytes are from timestamp, and low order 2 bytes are 0s.
-     * 生成初始sessionId。高8字节是serverId（也就是zk服务器的sid），低56字节来自时间戳，基准sessionId，后期逐个递增
      */
     public static long initializeNextSession(long id) {
         long nextSid;
         nextSid = (Time.currentElapsedTime() << 24) >>> 8;//先左移24位，再无符号右移8位，long类型64位
+        //生成初始sessionId。高8字节是serverId（也就是zk服务器的sid,传进来的id），低56字节来自时间戳，基准sessionId，后期逐个递增
+        //这个值是唯一的
         nextSid =  nextSid | (id <<56);
         if (nextSid == EphemeralType.CONTAINER_EPHEMERAL_OWNER) {
             ++nextSid;  // this is an unlikely edge case, but check it just in case
