@@ -73,11 +73,14 @@ public class ProposalRequestProcessor implements RequestProcessor {
          * call processRequest on the next processor.
          */
 
+        //如果是要同步给learner，create走下面
         if (request instanceof LearnerSyncRequest){
             zks.getLeader().processSync((LearnerSyncRequest)request);
         } else {
             //--这里的nextProcessor是Leader中定义CommitProposal，等待commit，
             // 然后调用leader的proposal来处理request,最后调用SycnProcessor来将Proposal持久化，给自己发ack
+            //这里会放到commit一个queue里面，也就是排队去了
+            //然后在下面还有处理逻辑
             nextProcessor.processRequest(request);
             if (request.getHdr() != null) {
                 // We need to sync and get consensus on any transactions
@@ -87,6 +90,7 @@ public class ProposalRequestProcessor implements RequestProcessor {
                 } catch (XidRolloverException e) {
                     throw new RequestProcessorException(e.getMessage(), e);
                 }
+                //这里还调用了sync
                 syncProcessor.processRequest(request);
             }
         }

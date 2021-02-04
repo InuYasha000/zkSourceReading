@@ -516,6 +516,7 @@ public class LearnerHandler extends ZooKeeperThread {
 
             // Start thread that blast packets in the queue to learner
             //--将需要同步的事务发给Follower，事务同步后，leader发送newleader包给follower
+            //这里有一个线程专门用于发送数据，在下面则是while true用于处理返回来的数据
             startSendingPackets();
             
             /*

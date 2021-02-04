@@ -113,10 +113,14 @@ public class SyncRequestProcessor extends ZooKeeperCriticalThread implements
             int randRoll = r.nextInt(snapCount/2);
             while (true) {
                 Request si = null;
+                //此时没有要刷盘的，所以可以阻塞等待
                 if (toFlush.isEmpty()) {
+                    //队列空阻塞
                     si = queuedRequests.take();
                 } else {
                     si = queuedRequests.poll();
+                    //这里其实就是说所有的事务日志都写到flush中了
+                    //下面还有个判断是写了超过1000条也会刷磁盘
                     if (si == null) {
                         flush(toFlush);
                         continue;

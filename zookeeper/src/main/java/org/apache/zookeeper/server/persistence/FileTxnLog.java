@@ -228,11 +228,14 @@ public class FileTxnLog implements TxnLog, Closeable {
            logFileWrite = new File(logDir, Util.makeLogName(hdr.getZxid()));
            fos = new FileOutputStream(logFileWrite);
            logStream=new BufferedOutputStream(fos);
+           //jute序列化输出流
            oa = BinaryOutputArchive.getArchive(logStream);
            //事务日志文件头部信息，魔数Magic，事务日志格式版本version，dbid
            FileHeader fhdr = new FileHeader(TXNLOG_MAGIC,VERSION, dbId);
+           //写到序列化输出流里面
            fhdr.serialize(oa, "fileheader");
            // Make sure that the magic number is written before padding.
+           //flush刷到磁盘
            logStream.flush();
            filePadding.setCurrentSize(fos.getChannel().position());
            streamsToFlush.add(fos);
@@ -247,6 +250,7 @@ public class FileTxnLog implements TxnLog, Closeable {
         //使用Adler32算法计算checksum
         Checksum crc = makeChecksumAlgorithm();
         crc.update(buf, 0, buf.length);
+        //用来校验这段数据不能被改变，防止内容被更改
         oa.writeLong(crc.getValue(), "txnEntryCRC");
         //写入事务日志文件流，此时并未写到磁盘上
         //详见commit()方法
@@ -343,6 +347,7 @@ public class FileTxnLog implements TxnLog, Closeable {
         }
         for (FileOutputStream log : streamsToFlush) {
             log.flush();
+            //强制刷盘
             if (forceSync) {
                 long startSyncNS = System.nanoTime();
 

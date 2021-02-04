@@ -815,6 +815,7 @@ public class Leader {
        // in order to be committed, a proposal must be accepted by a quorum.
        //
        // getting a quorum from all necessary configurations.
+        //大多数判断
         if (!p.hasAllQuorums()) {
            return false;                 
         }
@@ -928,7 +929,8 @@ public class Leader {
                     Long.toHexString(zxid), followerAddr);
             return;
         }
-        
+
+        //每个proposal都有一个ack集合，
         p.addAck(sid);        
         /*if (LOG.isDebugEnabled()) {
             LOG.debug("Count for zxid: 0x{} is {}",

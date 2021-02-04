@@ -135,6 +135,7 @@ public class Follower extends Learner{
             //6-- PROPOSAL是Leader将要执行的写事务命令，COMMIT是提交命令，有收到commit命令才真正执行PROPOSAL命令
             //6-- 同一个写事务在Leader和多个Follower上都执行一次，保证集群数据的一致性
             TxnHeader hdr = new TxnHeader();
+            //反序列化
             Record txn = SerializeUtils.deserializeTxn(qp.getData(), hdr);
             if (hdr.getZxid() != lastQueued + 1) {
                 LOG.warn("Got zxid 0x"

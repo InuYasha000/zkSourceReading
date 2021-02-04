@@ -321,7 +321,7 @@ public class QuorumHierarchical implements QuorumVerifier {
     /**
      * Verifies if a given set is a quorum.
      */
-    //--5zheli才是有判断1/2的判断，也就是大于1/2
+    //--5这里才是有判断1/2的判断，也就是大于1/2
     public boolean containsQuorum(Set<Long> set){
         HashMap<Long, Long> expansion = new HashMap<Long, Long>();
         

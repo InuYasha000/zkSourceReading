@@ -95,7 +95,7 @@ public class CommitProcessor extends ZooKeeperCriticalThread implements
         new LinkedBlockingQueue<Request>();
 
     /** Request for which we are currently awaiting a commit */
-    //7--等待处理队列，写事务会被放入该队列，直到收到commit消息才被移到commitRequest队列，等待被处理？？？？没看到移交给commitRequest
+    //7--等待处理队列，写事务会被放入该队列，直到收到commit（应该是ack消息吧？？？）消息才被移到commitRequest队列，等待被处理？？？？没看到移交给commitRequest
     //7--queuedRequests放入
     protected final AtomicReference<Request> nextPending =
         new AtomicReference<Request>();

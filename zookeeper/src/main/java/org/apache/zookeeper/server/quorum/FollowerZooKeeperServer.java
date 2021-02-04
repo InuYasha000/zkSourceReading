@@ -66,7 +66,7 @@ public class FollowerZooKeeperServer extends LearnerZooKeeperServer {
         return self.follower;
     }
 
-    //--调用链顺序FollowerRequestProcessor->commitProcessor->FinalRequestProcessor->
+    //--调用链顺序 FollowerRequestProcessor->commitProcessor->FinalRequestProcessor: 处理commit请求
     //--SyncRequestProcessor->SendAckRequestProcessor（leader过来的proposal事务请求）
     @Override
     protected void setupRequestProcessors() {
