@@ -182,6 +182,8 @@ public class Follower extends Learner{
             revalidate(qp);
             break;
         case Leader.SYNC:
+            //强一致性
+            //强制让leader等
             fzk.sync();
             break;
         default:

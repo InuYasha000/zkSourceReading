@@ -112,6 +112,7 @@ public class FinalRequestProcessor implements RequestProcessor {
         //7--第一部分调用ZookeeperServer的 processTxn
         synchronized (zks.outstandingChanges) {
             // Need to process local session requests
+            //写入内存数据库，起码在leader能够查询到
             rc = zks.processTxn(request);
 
             // request.hdr is set for write requests, which are the only ones

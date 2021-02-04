@@ -640,6 +640,7 @@ public class LearnerHandler extends ZooKeeperThread {
                     bb = bb.slice();
                     Request si;
                     if(type == OpCode.sync){
+                        //这就是强一致性的地方调用
                         si = new LearnerSyncRequest(this, sessionId, cxid, type, bb, qp.getAuthinfo());
                     } else {
                         si = new Request(null, sessionId, cxid, type, bb, qp.getAuthinfo());
